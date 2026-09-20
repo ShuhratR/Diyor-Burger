@@ -1,1 +1,1 @@
-import{AdminShell}from"./admin-shell";export function AdminPlaceholder({title}:{title:string}){return <AdminShell title={title}><section className="admin-card"><h2>{title}</h2><p>Функционал будет подключён на следующем этапе.</p></section></AdminShell>}
+import{requireAdmin}from"@/lib/auth/admin";import{AdminShell}from"./admin-shell";export async function AdminPlaceholder({title}:{title:string}){await requireAdmin();return <AdminShell title={title}><section className="admin-card"><h2>{title}</h2><p>Функционал будет подключён на следующем этапе.</p></section></AdminShell>}
