@@ -8,5 +8,6 @@ describe("calculateDelivery", () => {
   it("calculates Vakhsh threshold", () => { expect(calculateDelivery(24900, "delivery", vakhsh).deliveryFeeDiram).toBe(2000); expect(calculateDelivery(25000, "delivery", vakhsh).deliveryFeeDiram).toBe(0); });
   it("calculates Bokhtar threshold", () => { expect(calculateDelivery(24900, "delivery", bokhtar).deliveryFeeDiram).toBe(2000); expect(calculateDelivery(25000, "delivery", bokhtar).deliveryFeeDiram).toBe(0); });
   it("never charges pickup", () => expect(calculateDelivery(12000, "pickup").deliveryFeeDiram).toBe(0));
+  it("reports progress to free delivery without a negative remainder", () => { expect(calculateDelivery(14900, "delivery", kushoniyon).remainingForFreeDeliveryDiram).toBe(100); expect(calculateDelivery(15000, "delivery", kushoniyon).remainingForFreeDeliveryDiram).toBe(0); });
   it("rejects inactive zones", () => expect(() => calculateDelivery(10000, "delivery", { ...kushoniyon, isActive: false })).toThrow("unavailable"));
 });

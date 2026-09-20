@@ -6,3 +6,4 @@ export type Product = { id: string; categoryId: string; name: string; slug: stri
 export type MenuDataState<T> = { source: "supabase" | "development-fixture"; data: T } | { source: "unavailable"; data: null };
 export type ProductFilters = { category?: string; minPriceDiram?: number; maxPriceDiram?: number; sort?: "popular" | "price_asc" | "price_desc" | "name" };
 export type PublicRestaurantSettings = { restaurantName: string; contactPhone1?: string; contactPhone2?: string; instagramUrl?: string; mainAddress: string; pickupEnabled: boolean; pickupAddress?: string; pickupNote?: string; mapUrl?: string; workOpenTime?: string; workCloseTime?: string };
+export type PublicDeliveryZone = { id: string; name: string; isActive: boolean; deliveryFeeDiram: number; freeDeliveryThresholdDiram: number };
