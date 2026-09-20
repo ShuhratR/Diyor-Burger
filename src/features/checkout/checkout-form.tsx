@@ -4,32 +4,18 @@ import { FormEvent, useMemo, useState } from "react";
 import { calculateDelivery } from "@/lib/delivery";
 import { formatSomoni } from "@/lib/money";
 import type { PublicDeliveryZone, PublicRestaurantSettings } from "@/lib/menu/types";
-import { checkoutSchema, type Fulfillment } from "./core";
+import { validateCheckoutDraft, type CheckoutDraftData } from "./draft";
 import styles from "./checkout-form.module.css";
 
-export type CheckoutDraftFields = {
-  name: string;
-  phone: string;
-  fulfillment: Fulfillment;
-  zoneId?: string;
-  address?: string;
-  comment: string;
-};
+export type CheckoutDraftFields = CheckoutDraftData & { comment: string };
 
 type CheckoutFormProps = {
   initialValues?: Partial<CheckoutDraftFields>;
-  onSubmit?: (values: CheckoutDraftFields) => void;
+  onSubmit?: (values: CheckoutDraftData) => void;
   zones: PublicDeliveryZone[];
   settings: PublicRestaurantSettings;
   subtotalDiram: number;
 };
-
-const formSchema = checkoutSchema.pick({
-  name: true,
-  phone: true,
-  fulfillment: true,
-  comment: true,
-});
 
 export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtotalDiram }: CheckoutFormProps) {
   const [values, setValues] = useState<CheckoutDraftFields>({
@@ -58,16 +44,13 @@ export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtota
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = formSchema.safeParse(values);
-    const nextErrors: Record<string, string> = result.success ? {} : Object.fromEntries(result.error.issues.map((issue) => [String(issue.path[0]), issue.message]));
-    if (values.fulfillment === "delivery" && !values.zoneId) nextErrors.zoneId = "Выберите район доставки.";
-    if (values.fulfillment === "delivery" && !values.address?.trim()) nextErrors.address = "Укажите точный адрес.";
-    if (Object.keys(nextErrors).length) {
-      setErrors(nextErrors);
+    const result = validateCheckoutDraft(values, { activeZoneIds: activeZones.map((zone) => zone.id), pickupEnabled: settings.pickupEnabled });
+    if (!result.success) {
+      setErrors(result.errors);
       return;
     }
     setErrors({});
-    if (result.success) onSubmit?.({ ...values, name: result.data.name, phone: result.data.phone, comment: result.data.comment ?? "" });
+    onSubmit?.(result.data);
   }
 
   return <form className={styles.form} onSubmit={submit} noValidate>
