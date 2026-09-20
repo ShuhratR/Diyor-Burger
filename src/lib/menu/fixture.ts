@@ -1,13 +1,13 @@
 import type { Category, Product } from "./types";
 
 export const fixtureCategories: Category[] = [
-  { id: "burgers", name: "Бургеры", slug: "burgers", isActive: true, sortOrder: 1 },
-  { id: "hotdogs", name: "Хот-доги", slug: "hotdogs", isActive: true, sortOrder: 2 },
-  { id: "rolls", name: "Роллы", slug: "rolls", isActive: true, sortOrder: 3 },
-  { id: "pizza", name: "Пицца", slug: "pizza", isActive: true, sortOrder: 4 },
-  { id: "sides", name: "Гарниры", slug: "sides", isActive: true, sortOrder: 5 },
-  { id: "drinks", name: "Напитки", slug: "drinks", isActive: true, sortOrder: 6 },
-  { id: "combos", name: "Комбо", slug: "combos", isActive: true, sortOrder: 7 },
+  { id: "burgers", name: "Бургеры", nameTj:"Бургерҳо", slug: "burgers", isActive: true, sortOrder: 1 },
+  { id: "hotdogs", name: "Хот-доги", nameTj:"Хот-догҳо", slug: "hotdogs", isActive: true, sortOrder: 2 },
+  { id: "rolls", name: "Роллы", nameTj:"Роллҳо", slug: "rolls", isActive: true, sortOrder: 3 },
+  { id: "pizza", name: "Пицца", nameTj:"Пицца", slug: "pizza", isActive: true, sortOrder: 4 },
+  { id: "sides", name: "Гарниры", nameTj:"Иловаҳо", slug: "sides", isActive: true, sortOrder: 5 },
+  { id: "drinks", name: "Напитки", nameTj:"Нӯшокиҳо", slug: "drinks", isActive: true, sortOrder: 6 },
+  { id: "combos", name: "Комбо", nameTj:"Комбо", slug: "combos", isActive: true, sortOrder: 7 },
 ];
 export const fixtureProducts: Product[] = [
   { id:"hamburger",categoryId:"burgers",name:"Гамбургер",slug:"hamburger",productType:"NORMAL",description:"Сочная говяжья котлета, свежие овощи и фирменный соус.",ingredientsText:"говяжья котлета, овощи, фирменный соус",basePriceDiram:2200,isAvailable:true,isActive:true,isPopular:true,sortOrder:1 },

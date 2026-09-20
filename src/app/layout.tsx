@@ -4,5 +4,6 @@ import { BottomNav } from "@/components/bottom-nav";
 import { SiteHeader } from "@/components/site-header";
 import { CartProvider } from "@/features/cart/cart-provider";
 import { FavoritesProvider } from "@/features/favorites/favorites-provider";
+import { LanguageProvider } from "@/features/i18n/language-provider";
 export const metadata: Metadata = { title: "DIYOR BURGER", description: "Закажите любимые блюда DIYOR BURGER" };
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="ru"><body><CartProvider><FavoritesProvider><div className="app-shell"><SiteHeader /><main>{children}</main><BottomNav /></div></FavoritesProvider></CartProvider></body></html>; }
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="ru"><body><LanguageProvider><CartProvider><FavoritesProvider><div className="app-shell"><SiteHeader /><main>{children}</main><BottomNav /></div></FavoritesProvider></CartProvider></LanguageProvider></body></html>; }
