@@ -1,4 +1,4 @@
-export type DeliveryZone = { id: string; isActive: boolean; deliveryFeeDiram: number; freeDeliveryThresholdDiram: number };
+export type DeliveryZone = { id: string; name?: string; isActive: boolean; deliveryFeeDiram: number; freeDeliveryThresholdDiram: number };
 export type FulfillmentMethod = "delivery" | "pickup";
 export type DeliveryCalculation = { deliveryFeeDiram: number; totalDiram: number; remainingForFreeDeliveryDiram: number | null; isFreeDelivery: boolean };
 export function calculateDelivery(subtotalDiram: number, method: FulfillmentMethod, zone?: DeliveryZone): DeliveryCalculation {
