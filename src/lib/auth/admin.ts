@@ -1,0 +1,2 @@
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+export async function getAdminUser() { const client = await createSupabaseServerClient(); if (!client) return null; const { data: { user } } = await client.auth.getUser(); if (!user) return null; const { data: profile } = await client.from("admin_profiles").select("id").eq("id", user.id).eq("is_active", true).maybeSingle(); return profile ? user : null; }

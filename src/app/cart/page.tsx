@@ -1,0 +1,1 @@
+import { CartView } from "@/features/cart/cart-view";import{getActiveProducts}from"@/lib/menu/catalog";export default async function CartPage(){const p=await getActiveProducts();return <CartView products={p.data??[]}/>}

@@ -1,0 +1,2 @@
+import { getAdminUser } from "@/lib/auth/admin";
+export default async function AdminPage() { const user = await getAdminUser(); return <main className="admin-shell"><div className="admin-card"><h1>Админка DIYOR BURGER</h1>{user ? <p>Вы вошли как администратор. Управление меню будет добавлено на следующем этапе.</p> : <p>Вход доступен после подключения Supabase и создания первого администратора. Публичной регистрации нет.</p>}</div></main>; }

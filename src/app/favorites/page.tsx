@@ -1,0 +1,1 @@
+import{getActiveProducts}from"@/lib/menu/catalog";import{FavoritesList}from"@/features/favorites/favorites-list";export default async function FavoritesPage(){const p=await getActiveProducts();return <FavoritesList products={p.data??[]}/>}

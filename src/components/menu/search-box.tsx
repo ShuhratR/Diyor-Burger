@@ -1,0 +1,4 @@
+"use client";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+export function SearchBox({initial=""}:{initial?:string}) { const router=useRouter(); const params=useSearchParams(); const [value,setValue]=useState(initial); useEffect(()=>{const id=setTimeout(()=>{const next=new URLSearchParams(params); if(value.trim())next.set("q",value.trim());else next.delete("q"); router.replace(`/search?${next.toString()}`);},350);return()=>clearTimeout(id)},[value,router,params]); return <label className="search-box"><span>⌕</span><input value={value} onChange={e=>setValue(e.target.value)} placeholder="Найти блюдо" aria-label="Поиск по меню" />{value&&<button onClick={()=>setValue("")} type="button" aria-label="Очистить поиск">×</button>}</label>; }

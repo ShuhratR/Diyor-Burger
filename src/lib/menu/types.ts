@@ -1,0 +1,8 @@
+export type Category = { id: string; name: string; slug: string; imageUrl?: string; isActive: boolean; sortOrder: number };
+export type Variant = { id: string; name: string; priceDiram: number; isActive: boolean; sortOrder: number };
+export type ComboComponent = { id: string; name: string; description?: string; quantity: number; sortOrder: number };
+export type ProductType = "NORMAL" | "PIZZA" | "COMBO";
+export type Product = { id: string; categoryId: string; name: string; slug: string; productType: ProductType; description: string; ingredientsText: string; imageUrl?: string; basePriceDiram?: number; isAvailable: boolean; isActive: boolean; isPopular: boolean; sortOrder: number; variants?: Variant[]; comboComponents?: ComboComponent[] };
+export type MenuDataState<T> = { source: "supabase" | "development-fixture"; data: T } | { source: "unavailable"; data: null };
+export type ProductFilters = { category?: string; minPriceDiram?: number; maxPriceDiram?: number; sort?: "popular" | "price_asc" | "price_desc" | "name" };
+export type PublicRestaurantSettings = { restaurantName: string; contactPhone1?: string; contactPhone2?: string; instagramUrl?: string; mainAddress: string; pickupEnabled: boolean; pickupAddress?: string; pickupNote?: string; mapUrl?: string; workOpenTime?: string; workCloseTime?: string };
