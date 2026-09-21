@@ -1,5 +1,5 @@
 export type Category = { id: string; name: string; nameTj?: string; slug: string; imageUrl?: string; isActive: boolean; sortOrder: number };
-export type Variant = { id: string; name: string; nameTj?: string; priceDiram: number; isActive: boolean; sortOrder: number };
+export type Variant = { id: string; name: string; nameTj?: string; priceDiram: number; isActive: boolean; isAvailable?: boolean; sortOrder: number };
 export type ComboComponent = { id: string; name: string; nameTj?: string; description?: string; descriptionTj?: string; quantity: number; sortOrder: number };
 export type ProductType = "NORMAL" | "PIZZA" | "COMBO";
 export type Product = { id: string; categoryId: string; name: string; nameTj?: string; slug: string; productType: ProductType; description: string; descriptionTj?: string; ingredientsText: string; ingredientsTextTj?: string; imageUrl?: string; basePriceDiram?: number; isAvailable: boolean; isActive: boolean; isPopular: boolean; sortOrder: number; variants?: Variant[]; comboComponents?: ComboComponent[] };
