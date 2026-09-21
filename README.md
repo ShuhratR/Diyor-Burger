@@ -10,7 +10,7 @@ Next.js App Router, TypeScript, Tailwind CSS, Supabase, Zod, Vitest, Vercel.
 
 1. Copy `.env.example` to `.env.local`.
 2. Add the Supabase URL and anon key.
-3. Apply the SQL migration in `supabase/migrations` to a new Supabase project.
+3. Verify the linked Supabase project, review `npx supabase migration list`, then apply the versioned migrations in `supabase/migrations`.
 4. Create the first Supabase Auth user, then manually insert its UUID into `admin_profiles`.
 5. Run `npm run dev`.
 
@@ -28,4 +28,4 @@ Money is stored in diram. Delivery zones, prices and WhatsApp number are databas
 
 ## Deployment
 
-Set the same public Supabase environment variables in Vercel. Apply migrations before a Preview deployment. Do not expose service-role keys to the browser.
+Set the same public Supabase environment variables in Vercel. Apply reviewed migrations before a Preview deployment. Do not expose service-role keys to the browser. See `OWNER_GUIDE.md` for owner operations.
