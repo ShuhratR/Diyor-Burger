@@ -1,0 +1,1 @@
+.admin-nav{display:flex;gap:8px;overflow-x:auto;margin:14px 0 18px;padding:2px;scrollbar-width:none}.admin-nav a{flex:none;min-height:42px;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:.82rem;font-weight:800}@media(max-width:340px){.admin-shell{margin:16px auto;padding:12px}.admin-card{padding:18px}}
