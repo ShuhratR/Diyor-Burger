@@ -11,3 +11,4 @@ tsconfig.tsbuildinfo
 Thumbs.db
 .idea/
 .vscode/
+supabase/.temp/
