@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import type { Category } from "@/lib/menu/types";
 import { useLanguage } from "@/features/i18n/language-provider";
