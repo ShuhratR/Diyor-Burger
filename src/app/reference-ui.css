@@ -122,6 +122,7 @@ body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sa
 .category-strip { gap:8px; padding:4px 0 14px; }
 .category-strip-visual a { display:grid; grid-template-rows:46px auto; place-items:center; width:84px; min-height:88px; padding:8px 5px; border:0; border-radius:18px; background:var(--db-soft); box-shadow:none; font-size:.70rem; text-align:center; }
 .category-strip-visual a.selected { background:linear-gradient(135deg,#ffd963,#ffbe1d); }
+.category-strip-visual .food-image { width:52px; height:46px; min-height:0; object-fit:contain; object-position:center; background:transparent; }
 .category-glyph { width:34px; height:34px; }
 .filter-row { gap:8px; margin:0 0 14px; }
 .filter-row a { min-height:44px; padding:11px 14px; }
