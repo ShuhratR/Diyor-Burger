@@ -1,0 +1,22 @@
+:root{
+  --diyor-brown:#2B0E03;
+  --diyor-orange:#FF6A00;
+  --diyor-yellow:#FFC229;
+  --diyor-text:#0B0B0B;
+  --diyor-muted:#6B6B73;
+  --diyor-nav:#6F7178;
+  --diyor-success:#25B84B;
+  --diyor-whatsapp:#25D366;
+  --diyor-danger:#FF3B3B;
+  --icon-topbar:30px;
+  --icon-bottom-nav:28px;
+  --icon-action:28px;
+  --touch-min:44px;
+}
+.icon{width:24px;height:24px;display:inline-block;color:currentColor;flex:none}
+.icon--topbar{width:var(--icon-topbar);height:var(--icon-topbar);color:var(--diyor-text)}
+.icon--nav{width:var(--icon-bottom-nav);height:var(--icon-bottom-nav);color:var(--diyor-nav)}
+.icon--nav-active{color:var(--diyor-orange)}
+.icon--danger{color:var(--diyor-danger)}
+.icon--success{color:var(--diyor-success)}
+.icon-button{min-width:var(--touch-min);min-height:var(--touch-min);display:inline-grid;place-items:center}

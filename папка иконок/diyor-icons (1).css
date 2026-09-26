@@ -1,0 +1,251 @@
+{
+  "pack": "DIYOR BURGER Icon Pack",
+  "source_screen_count": 18,
+  "vector_icon_count": 54,
+  "icons": [
+    {
+      "id": "arrow-left",
+      "file": "svg/ui/arrow-left.svg"
+    },
+    {
+      "id": "arrow-right",
+      "file": "svg/ui/arrow-right.svg"
+    },
+    {
+      "id": "burger-nav",
+      "file": "svg/ui/burger-nav.svg"
+    },
+    {
+      "id": "cart",
+      "file": "svg/ui/cart.svg"
+    },
+    {
+      "id": "category-burger",
+      "file": "svg/categories/category-burger.svg"
+    },
+    {
+      "id": "category-combo",
+      "file": "svg/categories/category-combo.svg"
+    },
+    {
+      "id": "category-drink",
+      "file": "svg/categories/category-drink.svg"
+    },
+    {
+      "id": "category-fries",
+      "file": "svg/categories/category-fries.svg"
+    },
+    {
+      "id": "category-hotdog",
+      "file": "svg/categories/category-hotdog.svg"
+    },
+    {
+      "id": "category-other",
+      "file": "svg/categories/category-other.svg"
+    },
+    {
+      "id": "category-pizza",
+      "file": "svg/categories/category-pizza.svg"
+    },
+    {
+      "id": "category-roll",
+      "file": "svg/categories/category-roll.svg"
+    },
+    {
+      "id": "check",
+      "file": "svg/ui/check.svg"
+    },
+    {
+      "id": "check-circle",
+      "file": "svg/ui/check-circle.svg"
+    },
+    {
+      "id": "chef-hat",
+      "file": "svg/ui/chef-hat.svg"
+    },
+    {
+      "id": "chevron-down",
+      "file": "svg/ui/chevron-down.svg"
+    },
+    {
+      "id": "chevron-right",
+      "file": "svg/ui/chevron-right.svg"
+    },
+    {
+      "id": "clock",
+      "file": "svg/ui/clock.svg"
+    },
+    {
+      "id": "close-x",
+      "file": "svg/ui/close-x.svg"
+    },
+    {
+      "id": "credit-card",
+      "file": "svg/ui/credit-card.svg"
+    },
+    {
+      "id": "crown",
+      "file": "svg/ui/crown.svg"
+    },
+    {
+      "id": "discount-badge",
+      "file": "svg/ui/discount-badge.svg"
+    },
+    {
+      "id": "document",
+      "file": "svg/ui/document.svg"
+    },
+    {
+      "id": "external-link",
+      "file": "svg/ui/external-link.svg"
+    },
+    {
+      "id": "filter-sliders",
+      "file": "svg/ui/filter-sliders.svg"
+    },
+    {
+      "id": "gift",
+      "file": "svg/ui/gift.svg"
+    },
+    {
+      "id": "hash",
+      "file": "svg/ui/hash.svg"
+    },
+    {
+      "id": "headset",
+      "file": "svg/ui/headset.svg"
+    },
+    {
+      "id": "heart-filled",
+      "file": "svg/ui/heart-filled.svg"
+    },
+    {
+      "id": "heart-outline",
+      "file": "svg/ui/heart-outline.svg"
+    },
+    {
+      "id": "home",
+      "file": "svg/ui/home.svg"
+    },
+    {
+      "id": "info-circle",
+      "file": "svg/ui/info-circle.svg"
+    },
+    {
+      "id": "instagram",
+      "file": "svg/brand/instagram.svg"
+    },
+    {
+      "id": "leaf",
+      "file": "svg/ui/leaf.svg"
+    },
+    {
+      "id": "location-pin",
+      "file": "svg/ui/location-pin.svg"
+    },
+    {
+      "id": "map-fold",
+      "file": "svg/ui/map-fold.svg"
+    },
+    {
+      "id": "menu-hamburger",
+      "file": "svg/ui/menu-hamburger.svg"
+    },
+    {
+      "id": "message-square",
+      "file": "svg/ui/message-square.svg"
+    },
+    {
+      "id": "minus",
+      "file": "svg/ui/minus.svg"
+    },
+    {
+      "id": "navigation",
+      "file": "svg/ui/navigation.svg"
+    },
+    {
+      "id": "phone",
+      "file": "svg/ui/phone.svg"
+    },
+    {
+      "id": "plus",
+      "file": "svg/ui/plus.svg"
+    },
+    {
+      "id": "radio-off",
+      "file": "svg/ui/radio-off.svg"
+    },
+    {
+      "id": "radio-on",
+      "file": "svg/ui/radio-on.svg"
+    },
+    {
+      "id": "scooter",
+      "file": "svg/ui/scooter.svg"
+    },
+    {
+      "id": "search",
+      "file": "svg/ui/search.svg"
+    },
+    {
+      "id": "shield-check",
+      "file": "svg/ui/shield-check.svg"
+    },
+    {
+      "id": "spark-rays",
+      "file": "svg/ui/spark-rays.svg"
+    },
+    {
+      "id": "storefront",
+      "file": "svg/ui/storefront.svg"
+    },
+    {
+      "id": "trash",
+      "file": "svg/ui/trash.svg"
+    },
+    {
+      "id": "truck",
+      "file": "svg/ui/truck.svg"
+    },
+    {
+      "id": "user",
+      "file": "svg/ui/user.svg"
+    },
+    {
+      "id": "utensils",
+      "file": "svg/ui/utensils.svg"
+    },
+    {
+      "id": "whatsapp",
+      "file": "svg/brand/whatsapp.svg"
+    }
+  ],
+  "photo_category_tiles": [
+    "all.png",
+    "burger.png",
+    "combo.png",
+    "drink.png",
+    "fries.png",
+    "hotdog.png",
+    "pizza.png",
+    "roll.png"
+  ],
+  "photo_ingredient_tiles": [
+    "basil_spices.png",
+    "beef_patty.png",
+    "cheese.png",
+    "dough.png",
+    "lettuce.png",
+    "mozzarella.png",
+    "pepperoni.png",
+    "red_onion.png",
+    "signature_sauce.png",
+    "tomato_sauce.png",
+    "tomatoes.png"
+  ],
+  "notes": [
+    "SVGs are reconstructed from raster visual references.",
+    "Use SVG for production functional icons; use PNG crops as visual references unless original product assets are available.",
+    "Reference screens contain several design variants; README_RU.md documents normalized recommendations."
+  ]
+}

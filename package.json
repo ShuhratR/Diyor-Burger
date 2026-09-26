@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:visual": "node scripts/visual-compare.mjs"
   },
   "engines": {
     "node": ">=20.9.0"
@@ -32,6 +33,9 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
     "supabase": "^2.117.0"
   }
 }

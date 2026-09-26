@@ -1,0 +1,44 @@
+@media(max-width:600px){
+  body{background:#fff}
+  .app-shell{max-width:760px;margin:0 auto;padding:0 10px 68px;background:#fff}
+  .site-header{min-height:54px;grid-template-columns:34px minmax(90px,1fr) auto 70px;gap:3px;align-items:center}
+  .menu-button,.header-icon{width:34px;height:38px}
+  .menu-button{gap:4px}.menu-button span{width:20px;height:2px}
+  .site-header nav{display:flex;grid-column:auto;gap:1px;justify-content:flex-end}
+  .site-header .language-switch{display:none}
+  .brand{justify-content:flex-start;gap:3px;font-size:.74rem;letter-spacing:.01em}
+  .brand-mark{position:relative;display:block;width:32px;height:32px;border-radius:0;background:none;box-shadow:none;color:transparent;font-size:0;letter-spacing:0}
+  .brand-mark i{position:absolute;left:0;top:-3px;color:#101114;font-size:1.85rem;font-style:normal;line-height:1;letter-spacing:-.1em}
+  .brand-mark b{position:absolute;left:13px;top:1px;display:block;color:#ff6a00;font-size:1.55rem;line-height:1;letter-spacing:-.1em}
+  .brand>span:last-child{font-size:.79rem}.brand>span:last-child b{font-size:.78em}
+  .header-location{display:flex;align-items:center;gap:2px;font-size:.67rem;font-weight:800;white-space:nowrap}
+  .header-location svg{width:17px;height:17px;fill:#f87912;stroke:#f87912;stroke-width:1.6}
+  .header-location b{font-size:.84rem}.header-icon svg{width:22px;height:22px}
+  .section{margin:10px 0}.section h1{font-size:1.65rem}.section h2{font-size:1.15rem}
+  .page-hero{padding:16px;border-radius:18px;box-shadow:0 5px 14px #32170b16}
+  .page-hero h1{font-size:1.75rem;line-height:1.02}
+  .page-hero p{margin-top:7px;font-size:.85rem;line-height:1.35}
+  .empty-page{gap:12px;padding-top:12px}.empty-page .page-hero{text-align:center}
+  .cta{min-height:48px;padding:12px 17px;font-size:.9rem}
+  .cart-item{grid-template-columns:84px minmax(0,1fr);gap:9px;padding:9px;border-radius:15px}
+  .cart-item .food-image,.cart-item .food-placeholder{width:84px;height:84px;min-height:84px;border-radius:12px}
+  .cart-item-copy h2{font-size:.98rem}.cart-item-copy p{font-size:.77rem}
+  .cart-summary{padding:13px;border-radius:16px}.cart-summary .cart-total{padding:12px;font-size:1rem}
+  .favorites-page .product-grid{grid-template-columns:1fr;gap:9px}
+  .favorites-page .product-card{display:grid;grid-template-columns:80px minmax(0,1fr);min-height:90px;border-radius:14px}
+  .favorites-page .product-card>a{display:grid;grid-template-columns:80px minmax(0,1fr);height:auto}
+  .favorites-page .product-card .food-image{width:80px;height:80px;min-height:80px;align-self:center;border-radius:12px}
+  .favorites-page .product-card-copy{padding:7px 9px}.favorites-page .product-card h3{font-size:.95rem}
+  .favorites-page .product-card p{display:-webkit-box;font-size:.72rem;margin:4px 0}.favorites-page .card-actions{right:6px;top:5px;bottom:auto;flex-direction:row}
+  .favorites-page .card-actions button:first-child{color:#ff3b3b;font-size:1.15rem}.favorites-page .card-actions button:last-child{position:absolute;top:39px;right:3px;background:#ffc229;color:#20160f}
+  .contacts-page{gap:10px}.contacts-page .page-hero{display:none}.contact-list{gap:8px}
+  .contact-card{min-height:58px;padding:10px 12px;border-radius:14px}.contact-card b{font-size:.9rem}.contact-card span{font-size:.78rem}
+  .contact-card>a,.contact-card .contact-action{min-height:38px;padding:9px 12px;font-size:.78rem}
+  .contacts-map{min-height:118px;padding:12px;border-radius:14px}
+  .bottom-nav{padding:5px 4px calc(5px + env(safe-area-inset-bottom));border-color:#eee}
+  .bottom-nav a{gap:1px;font-size:.42rem}.bottom-icon{height:21px}.bottom-icon svg{width:19px;height:19px}
+  .product-detail{padding:0 0 18px}.product-detail>.food-image{height:220px;min-height:220px;border-radius:14px}
+  .product-detail h1{margin:12px 0 6px;font-size:1.55rem}.product-detail section{margin:12px 0;padding:13px;border-radius:15px}
+  .product-price{padding:11px;border-radius:15px}.variant-selector>div{gap:6px}.variant-selector button{padding:9px 5px;border-radius:12px;font-size:.82rem}
+  .search-box{margin:8px 0;padding:10px 12px;border-radius:14px}
+}

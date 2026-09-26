@@ -6,6 +6,8 @@ node_modules/
 .env.*
 !.env.example
 coverage/
+artifacts/
+homepage-current*.png
 tsconfig.tsbuildinfo
 .DS_Store
 Thumbs.db

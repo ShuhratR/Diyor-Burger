@@ -1,0 +1,82 @@
+# DIYOR BURGER — Icon & Pictogram Pack
+
+Собрано по 18 предоставленным мобильным reference-экранам.
+
+## Что внутри
+
+- `svg/ui/` — функциональные UI-иконки в SVG (`currentColor`, можно перекрашивать CSS).
+- `svg/brand/` — WhatsApp и Instagram.
+- `svg/categories/` — векторные category pictograms.
+- `photo_pictograms/category_tiles/` — raster-reference карточек категорий, вырезанные из экрана фильтров.
+- `photo_pictograms/ingredient_tiles/` — raster-reference ингредиентов из экранов Pizza / Bigburger.
+- `references/screens/` — все 18 исходных reference-экранов с понятными именами.
+- `references/crops/` — увеличенные reference-фрагменты для сверки.
+- `icon_usage.csv` — главный файл: цвет, размер, экран, применение каждой иконки.
+- `screen_icon_map.json` — какие иконки используются на каждом экране.
+- `tokens.json` — палитра, типовые размеры и stroke.
+- `diyor-icons.css` — готовые CSS-токены.
+
+## Важно
+
+Иконки реконструированы по raster/generated reference-экранам. Это не исходные дизайнерские SVG-файлы, поэтому формы максимально близкие по стилю, но не гарантированно пиксель-в-пиксель идентичные неизвестному исходному набору.
+
+Сами reference-экраны немного расходятся между собой:
+- активный nav иногда жёлтый, иногда оранжевый;
+- логотип встречается в нескольких вариантах;
+- нижняя навигация меняет один пункт (`Избранное`, `Акции`, `Профиль`) между сценариями.
+
+В pack это нормализовано: основной active color — `#FF6A00`, CTA yellow — `#FFC229`.
+
+## Основные размеры
+
+| Контекст | Иконка | Touch target |
+|---|---:|---:|
+| Top bar | 30 px | 44 px min |
+| Bottom navigation | 28 px | 48 px |
+| Add / plus | 28 px | 48 px circle |
+| Form leading | 26 px | 44 px row |
+| Contact row | 24 px | 48 px circle |
+| Favorite heart | 30 px | 44 px |
+| Order success check | 72 px | — |
+| Small category chip | 24 px | 40–44 px |
+
+## Цвета
+
+- Main brown: `#2B0E03`
+- Active orange: `#FF6A00`
+- CTA yellow: `#FFC229`
+- Primary text: `#0B0B0B`
+- Secondary text: `#6B6B73`
+- Inactive nav: `#6F7178`
+- WhatsApp: `#25D366`
+- Success: `#25B84B`
+- Favorite / danger: `#FF3B3B`
+
+## Правила внедрения
+
+1. SVG-иконки подключать как inline SVG / component, чтобы работал `currentColor`.
+2. Цвет задавать контейнером, а не создавать 5 дубликатов одного SVG.
+3. У clickable icons touch target минимум 44×44 px.
+4. Bottom nav: icon 28 px + label; active state orange.
+5. Product `+`: glyph 28 px внутри 48 px круга.
+6. Не использовать raster crop как production icon, если есть SVG. Raster reference нужен для визуальной сверки.
+7. Category/ingredient photo tiles — это именно reference assets; если в проекте есть оригинальные прозрачные PNG/WebP, использовать оригиналы.
+8. Badge количества корзины — отдельный UI badge (orange circle + white/black number), не часть `cart.svg`.
+
+## Пример React
+
+```tsx
+import CartIcon from "./assets/icons/svg/ui/cart.svg?react";
+
+<button className="icon-button" aria-label="Корзина">
+  <CartIcon className="icon icon--topbar" />
+</button>
+```
+
+## Пример обычного img
+
+```html
+<img src="/assets/icons/svg/ui/search.svg" width="30" height="30" alt="" />
+```
+
+Если нужен CSS-color control, лучше inline/component SVG, потому что `currentColor` не перекрашивает внешний `<img>`.

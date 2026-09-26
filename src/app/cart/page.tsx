@@ -1,1 +1,1 @@
-import { CartView } from "@/features/cart/cart-view";import{getActiveProducts}from"@/lib/menu/catalog";export default async function CartPage(){const p=await getActiveProducts();return <CartView products={p.data??[]}/>}
+import { ReferenceCartView } from "@/features/cart/reference-cart-view";import{getActiveProducts}from"@/lib/menu/catalog";export default async function CartPage(){const p=await getActiveProducts();return <ReferenceCartView products={p.data??[]}/>}

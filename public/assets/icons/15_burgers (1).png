@@ -1,0 +1,55 @@
+﻿icon_id,file,color_in_reference,recommended_size_px,screens,usage,implementation_notes
+arrow-left,svg/ui/arrow-left.svg,#0B0B0B,30,"1-6,8-18",Top-left back action,44x44 touch target; icon 28-32px
+menu-hamburger,svg/ui/menu-hamburger.svg,#0B0B0B,30,7,Home top-left menu,Only home shell version
+search,svg/ui/search.svg,#0B0B0B,30,"6-13,15-17",Top-right search,44x44 touch target
+cart,svg/ui/cart.svg,#0B0B0B / #FF6A00,30,1-18,Header + bottom navigation + CTA,Active bottom state orange; header black
+home,svg/ui/home.svg,#6F7178 / #FF6A00,28,"1-7,10-18",Bottom navigation / secondary button,Active Home orange
+utensils,svg/ui/utensils.svg,#6F7178,28,"1-7,10-18",Bottom navigation Menu,Inactive mostly gray/black
+burger-nav,svg/ui/burger-nav.svg,#6F7178 / #FF6A00,28,"4-7,10-18",Bottom navigation Combo,Active on burger/combo context in some references
+user,svg/ui/user.svg,#6F7178 / #2B0E03,28,"1-7,10-18",Profile/contact/user field,Header/form variant black/brown
+heart-outline,svg/ui/heart-outline.svg,#6F7178,28,1-3,Favorites navigation,Inactive outline
+heart-filled,svg/ui/heart-filled.svg,#FF3B3B / #FFB800,30,3,Favorite item / active Favorites nav,Item hearts red; active nav heart yellow
+plus,svg/ui/plus.svg,#FFFFFF,28,"3,6-17",Add product / increment,Usually inside dark brown or yellow 44-52px circle
+minus,svg/ui/minus.svg,#6F7178,28,"6,8,9,14",Decrease quantity,Usually inside light neutral 44-52px circle
+trash,svg/ui/trash.svg,#0B0B0B,24,6,Remove cart item,Top-right of cart item row
+close-x,svg/ui/close-x.svg,#0B0B0B / #6B6B73,28,"4,7,18",Clear field / close sheet/filter,24px field clear; 28-32 close page/sheet
+arrow-right,svg/ui/arrow-right.svg,#0B0B0B,24,"4-8,18",CTA trailing arrow,Often inside white circular capsule on yellow CTA
+chevron-right,svg/ui/chevron-right.svg,#2B0E03,24,"1,6",Support row / cart secondary navigation,Right aligned
+chevron-down,svg/ui/chevron-down.svg,#0B0B0B,18,"4,7",City/location dropdown,Small inline icon
+external-link,svg/ui/external-link.svg,#0B0B0B,22,1,Instagram/Open external action,Inside yellow button
+location-pin,svg/ui/location-pin.svg,#2B0E03 / #FF6A00,26,"1,2,4,7",Address / city / delivery,Topbar location orange
+navigation,svg/ui/navigation.svg,#2B0E03,24,1,Build route button,Inside yellow button
+phone,svg/ui/phone.svg,#FFFFFF / #2B0E03,24,"1,2,4",Phone contact/form,White inside brown circle on Contacts
+clock,svg/ui/clock.svg,#FFFFFF / #2B0E03,24,"1,2",Working hours / order time,Contacts uses white on brown circle
+map-fold,svg/ui/map-fold.svg,#FFFFFF,24,1,Open map button,White on dark brown button
+headset,svg/ui/headset.svg,#2B0E03,28,1,Need help card,Brown inside pale circle
+check,svg/ui/check.svg,#FFFFFF,30,"2,4,7",Selected/confirmed state,White check on green or brown filled circle
+check-circle,svg/ui/check-circle.svg,#25B84B,72,"2,7",Order success / add-to-cart success,Large 72px order success; 44px sheet status
+hash,svg/ui/hash.svg,#2B0E03,22,2,Order number row,Leading icon
+document,svg/ui/document.svg,#FFFFFF / #2B0E03,28,2,Order received / view order,Step icon + button
+chef-hat,svg/ui/chef-hat.svg,#FFFFFF,28,2,Preparing order step,White on brown step circle
+truck,svg/ui/truck.svg,#FFFFFF / #2B0E03,28,2,Delivery method / delivery step,Step and detail row
+gift,svg/ui/gift.svg,#F6A900 / #2B0E03,30,"4,5",Promo/thank-you banner,Yellow/orange
+info-circle,svg/ui/info-circle.svg,#FF6A00,24,14,Combo informational note,Orange icon in pale circle
+storefront,svg/ui/storefront.svg,#0B0B0B,32,4,Pickup option,Large option card icon
+message-square,svg/ui/message-square.svg,#0B0B0B,26,4,Order comment field,Form leading icon
+credit-card,svg/ui/credit-card.svg,#2B0E03,22,2,Order total/payment detail,Order detail row
+leaf,svg/ui/leaf.svg,#43A516,32,"7,9",Fresh ingredients benefit,Green
+shield-check,svg/ui/shield-check.svg,#FF6A00,32,"7,9",High quality benefit,Orange
+scooter,svg/ui/scooter.svg,#FF6A00,32,"4,7,9",Delivery option / fast delivery benefit,Orange
+crown,svg/ui/crown.svg,#FFB800,28,"5,8,9,15,16",Decorative premium mark,Decorative; not interactive
+spark-rays,svg/ui/spark-rays.svg,#FFB800,24,"5,9",Decorative emphasis rays,Decorative
+radio-off,svg/ui/radio-off.svg,#D9D4CE,24,18,Filter sort unselected,Neutral outline
+radio-on,svg/ui/radio-on.svg,#FF6A00,24,18,Filter sort selected,Orange
+discount-badge,svg/ui/discount-badge.svg,#6F7178,28,3,Promotions bottom navigation icon,% badge
+filter-sliders,svg/ui/filter-sliders.svg,#0B0B0B,26,18 / optional menu screens,Open filters,Use if a filter trigger is added
+whatsapp,svg/brand/whatsapp.svg,#25D366,28-48,"1,2,4,6,7,9",WhatsApp contact/order/benefit,Keep brand green; white phone mark
+instagram,svg/brand/instagram.svg,brand gradient,44,1,Instagram contact row,Use full-color app mark
+category-burger,svg/categories/category-burger.svg,#0B0B0B,24,"7,15,17,18",Burger category pictogram,Use line icon in chips; photo tile available separately
+category-hotdog,svg/categories/category-hotdog.svg,#0B0B0B,24,"7,16-18",Hot-dog category pictogram,Line icon/chip
+category-roll,svg/categories/category-roll.svg,#0B0B0B,24,"7,13,17,18",Roll category pictogram,Line icon/chip
+category-pizza,svg/categories/category-pizza.svg,#0B0B0B,24,"7,8,12,17,18",Pizza category pictogram,Line icon/chip
+category-fries,svg/categories/category-fries.svg,#0B0B0B,24,"7,11,18",Sides/fries category pictogram,Line icon/chip
+category-drink,svg/categories/category-drink.svg,#0B0B0B,24,"7,10,18",Drinks category pictogram,Line icon/chip
+category-combo,svg/categories/category-combo.svg,#0B0B0B,24,"7,14,17,18",Combo category pictogram,Line icon/chip
+category-other,svg/categories/category-other.svg,#0B0B0B,24,7,Other category pictogram,Home category row

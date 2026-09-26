@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Product, PublicDeliveryZone, PublicRestaurantSettings } from "@/lib/menu/types";
-import { subtotal } from "@/features/cart/logic";
+import { key, subtotal } from "@/features/cart/logic";
 import { useCart } from "@/features/cart/cart-provider";
+import { FoodImage } from "@/components/menu/food-image";
+import { productDisplayPrice } from "@/lib/menu/logic";
 import { CheckoutForm } from "./checkout-form";
 import { checkoutDraftStorageKey, readCheckoutDraft, saveCheckoutDraft, type CheckoutDraftData } from "./draft";
 
@@ -21,6 +23,21 @@ export function CheckoutPageClient({ products, settings, zones }: CheckoutPageCl
   const [draft, setDraft] = useState<CheckoutDraftData | null>(null);
   const [draftReady, setDraftReady] = useState(false);
   const availableZones = useMemo(() => zones.filter((zone) => zone.isActive), [zones]);
+  const cartLines = useMemo(() => cart.items.flatMap((item) => {
+    const product = products.find((candidate) => candidate.id === item.productId);
+    if (!product) return [];
+    const variant = item.variantId ? product.variants?.find((candidate) => candidate.id === item.variantId) : undefined;
+    const priceDiram = variant?.priceDiram ?? productDisplayPrice(product);
+    if (priceDiram === undefined) return [];
+    return [{
+      id: key(item),
+      name: product.name,
+      imageUrl: product.imageUrl,
+      variantName: variant?.name,
+      quantity: item.quantity,
+      priceDiram,
+    }];
+  }), [cart.items, products]);
 
   useEffect(() => {
     const restored = readCheckoutDraft(sessionStorage.getItem(checkoutDraftStorageKey), availableZones.map((zone) => zone.id));
@@ -37,5 +54,14 @@ export function CheckoutPageClient({ products, settings, zones }: CheckoutPageCl
     router.push("/checkout/review");
   }
 
-  return <section className="section"><h1>Оформление заказа</h1><p className="notice">Проверьте данные перед следующим шагом.</p><CheckoutForm settings={settings} zones={availableZones} subtotalDiram={subtotal(cart.items, products)} initialValues={draft ?? { fulfillment: availableZones.length ? "delivery" : "pickup" }} onSubmit={continueToReview} /></section>;
+  return <section className="section checkout-reference">
+    <div className="checkout-hero page-hero">
+      <span className="hero-script">Вкуснее каждый день!</span>
+      <h1>Оформление <em>заказа</em></h1>
+      <p>Вкусная еда ближе, чем кажется.</p>
+      <FoodImage src={cartLines[0]?.imageUrl ?? settings.heroImageUrl ?? "/images/hero-burger-v1.png"} alt="DIYOR BURGER" />
+    </div>
+    <aside className="checkout-note" aria-label="Способ подтверждения заказа"><span aria-hidden="true">◉</span><p>Мы свяжемся с вами через WhatsApp для подтверждения заказа.</p></aside>
+    <CheckoutForm cartLines={cartLines} settings={settings} zones={availableZones} subtotalDiram={subtotal(cart.items, products)} initialValues={draft ?? { fulfillment: availableZones.length ? "delivery" : "pickup" }} onSubmit={continueToReview} />
+  </section>;
 }

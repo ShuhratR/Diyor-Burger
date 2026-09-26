@@ -4,10 +4,20 @@ import { FormEvent, useMemo, useState } from "react";
 import { calculateDelivery } from "@/lib/delivery";
 import { formatSomoni } from "@/lib/money";
 import type { PublicDeliveryZone, PublicRestaurantSettings } from "@/lib/menu/types";
+import { FoodImage } from "@/components/menu/food-image";
 import { validateCheckoutDraft, type CheckoutDraftData } from "./draft";
 import styles from "./checkout-form.module.css";
 
 export type CheckoutDraftFields = CheckoutDraftData & { comment: string };
+
+export type CheckoutCartPreviewLine = {
+  id: string;
+  name: string;
+  imageUrl?: string;
+  variantName?: string;
+  quantity: number;
+  priceDiram: number;
+};
 
 type CheckoutFormProps = {
   initialValues?: Partial<CheckoutDraftFields>;
@@ -15,9 +25,10 @@ type CheckoutFormProps = {
   zones: PublicDeliveryZone[];
   settings: PublicRestaurantSettings;
   subtotalDiram: number;
+  cartLines: CheckoutCartPreviewLine[];
 };
 
-export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtotalDiram }: CheckoutFormProps) {
+export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtotalDiram, cartLines }: CheckoutFormProps) {
   const [values, setValues] = useState<CheckoutDraftFields>({
     name: initialValues?.name ?? "",
     phone: initialValues?.phone ?? "",
@@ -97,7 +108,17 @@ export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtota
       {errors.comment && <p className={styles.error} role="alert">Комментарий слишком длинный.</p>}
     </div>
 
-    <aside className={styles.summary}><span>Товары <b>{formatSomoni(subtotalDiram)}</b></span><span>Доставка <b>{values.fulfillment === "pickup" ? formatSomoni(0) : delivery ? delivery.isFreeDelivery ? "Бесплатно" : formatSomoni(delivery.deliveryFeeDiram) : "Выберите район"}</b></span><strong>Итого <b>{formatSomoni(delivery?.totalDiram ?? subtotalDiram)}</b></strong></aside>
+    <aside className={styles.orderPreview} aria-label="Ваш заказ">
+      <div className={styles.orderPreviewHeading}><b>Ваш заказ</b><a href="/cart">Изменить →</a></div>
+      <div className={styles.orderLines}>
+        {cartLines.map((line) => <div className={styles.orderLine} key={line.id}>
+          <FoodImage src={line.imageUrl} alt={line.name} compact />
+          <span><b>{line.name}</b><small>{line.variantName ? `${line.variantName} · ` : ""}{line.quantity} шт.</small></span>
+          <strong>{formatSomoni(line.priceDiram * line.quantity)}</strong>
+        </div>)}
+      </div>
+      <div className={styles.summary}><span>Сумма товаров <b>{formatSomoni(subtotalDiram)}</b></span><span>Доставка <b>{values.fulfillment === "pickup" ? formatSomoni(0) : delivery ? delivery.isFreeDelivery ? "Бесплатно" : formatSomoni(delivery.deliveryFeeDiram) : "Выберите район"}</b></span><strong>Итого <b>{formatSomoni(delivery?.totalDiram ?? subtotalDiram)}</b></strong></div>
+    </aside>
 
     <button className={styles.submit} type="submit">Продолжить</button>
   </form>;

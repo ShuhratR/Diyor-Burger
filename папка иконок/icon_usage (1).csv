@@ -1,0 +1,31 @@
+# Применение по экранам
+
+## 01 — Контакты
+Top: `arrow-left`. Contact rows: `phone`, `whatsapp`, `instagram`, `external-link`, `location-pin`, `navigation`, `clock`. Map CTA: `map-fold`. Help: `headset`, `chevron-right`. Bottom nav: `home`, `utensils`, `cart`, `heart-outline`, `user`.
+
+## 02 — Заказ успешно оформлен
+Большой `check-circle` ~72 px. Детали: `hash`, `user`, `phone`, `truck`, `location-pin`, `credit-card`, `clock`. Этапы: `document`, `whatsapp`, `chef-hat`, `truck`. Secondary: `home`.
+
+## 03 — Избранное
+`heart-filled` красный на карточках; active navigation — жёлтый/оранжевый heart. `plus` внутри жёлтого круга. Header cart + badge.
+
+## 04 — Checkout
+Top: back, location pin, dropdown chevron, cart. Delivery cards: scooter / storefront / selected check. Form: user, phone, pin, clear X, message. WhatsApp notice. Main CTA arrow-right.
+
+## 05 — Пустая корзина
+Back, cart, decorative crown/rays, CTA arrow-right, secondary home, promo gift.
+
+## 06 — Корзина
+Search, cart badge, trash, minus, plus, checkout arrow-right, WhatsApp.
+
+## 07 — Home + bottom sheet
+Hamburger, location, search, cart. Benefit icons: scooter (orange), leaf (green), shield-check (orange), WhatsApp (green). Product add plus. Bottom sheet: check-circle, close, cart.
+
+## 08–09 — Product details
+Header back/search/cart. Quantity minus/plus. Add-to-cart uses cart icon. Ingredient photo tiles are in `photo_pictograms/ingredient_tiles/`.
+
+## 10–13, 15–17 — Catalog screens
+Header back/search/cart. Product cards use plus. Bottom nav uses home/menu/combo/cart/profile. Category line pictograms are in `svg/categories/`.
+
+## 18 — Filters
+Close X, category photo tiles, price slider handles (CSS control, not separate icon), radio-on/radio-off, bottom CTA arrow-right.
