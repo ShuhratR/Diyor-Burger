@@ -12,7 +12,8 @@ import { useCart } from "@/features/cart/cart-provider";
 
 function isRoot(pathname: string) { return pathname === "/"; }
 
-export function SiteHeader({ locationLabel }: { locationLabel?: string }) {
+type HeaderContacts = { phone1?: string; phone2?: string; instagramUrl?: string; address?: string; mapUrl?: string };
+export function SiteHeader({ locationLabel, contacts }: { locationLabel?: string; contacts?: HeaderContacts }) {
   const pathname = usePathname();
   const router = useRouter();
   const { language } = useLanguage();
@@ -26,7 +27,7 @@ export function SiteHeader({ locationLabel }: { locationLabel?: string }) {
   const pageTitle = pathname === "/cart" ? "Корзина" : undefined;
 
   return <header className={`site-header ${hasDrawer ? "reference-home" : "reference-detail"}`}>
-    {hasDrawer ? <MobileDrawer /> : <button className="reference-back" type="button" onClick={() => router.back()} aria-label="Назад">‹</button>}
+    {hasDrawer ? <MobileDrawer contacts={contacts} /> : <button className="reference-back" type="button" onClick={() => router.back()} aria-label="Назад">‹</button>}
     <Link className="brand reference-wordmark" href="/" aria-label="DIYOR BURGER — главная"><BrandLogo /></Link>
     {pageTitle && <span className="site-header-title">{pageTitle}</span>}
     <nav aria-label="Быстрая навигация">

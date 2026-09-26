@@ -44,22 +44,34 @@ body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sa
 .bottom-nav a.active { color: var(--db-orange); }
 .bottom-nav .bottom-icon svg { width: 27px; height: 27px; stroke-width: 2.15; }
 
-/* Full-width drawer reference composition. */
-.drawer-backdrop { background:rgba(15,7,3,.62); backdrop-filter:blur(3px); }
-.drawer { display:flex; flex-direction:column; width:min(78vw,390px); padding:24px 20px 22px; background:#fff; }
-.drawer-brand { padding-top:6px; font-size:1.55rem; }
-.drawer-brand .brand-logo { width:218px; }
-.drawer-script { margin:20px 0 18px; color:var(--db-brown); font-size:1.25rem; font-style:italic; font-weight:800; }
-.drawer-script b { color:var(--db-gold); font-size:1.45rem; }
-.drawer nav { margin-top:2px; }
-.drawer nav a { display:grid; grid-template-columns:30px 1fr 20px; align-items:center; gap:12px; min-height:56px; padding:10px 12px; border:0; border-radius:16px; color:var(--db-ink); }
-.drawer nav a:first-child { background:linear-gradient(115deg,#fff3c8,#ffe49b); }
-.drawer nav a > .diyor-icon { width:28px; height:28px; color:var(--db-brown); }
-.drawer nav a > strong { font-size:1.05rem; }
-.drawer nav a > span { color:var(--db-ink); font-size:1.7rem; }
-.drawer-footer { margin-top:auto; padding-top:18px; border-top:1px solid #eee0d4; color:var(--db-muted); }
-.drawer-footer p { margin:0 0 6px; color:var(--db-brown); font-weight:900; }
-.drawer-footer a { color:var(--db-orange); font-weight:800; }
+/* Mobile drawer: the supplied artwork stays intact; only its outer whitespace is cropped by the frame. */
+.drawer-backdrop { position:fixed; inset:0; z-index:80; display:flex; background:rgba(0,0,0,.60); backdrop-filter:blur(2px); animation:drawer-fade .25s ease-out both; }
+.drawer-backdrop.is-closing { animation-direction:reverse; }
+.drawer { position:relative; display:flex; flex-direction:column; width:min(86vw,420px); height:100dvh; overflow-x:hidden; overflow-y:auto; padding:calc(12px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom)); border-radius:0 26px 26px 0; background:#fff; box-shadow:24px 0 54px rgba(0,0,0,.24); animation:drawer-slide .25s cubic-bezier(.2,.8,.2,1) both; overscroll-behavior:contain; }
+.drawer.is-closing { animation-direction:reverse; }
+.drawer-close { position:absolute; z-index:2; top:calc(14px + env(safe-area-inset-top)); right:16px; display:grid; place-items:center; width:48px; height:48px; padding:0; border:0; border-radius:50%; background:#fff7f1; color:#211713; cursor:pointer; }
+.drawer-close .drawer-icon { width:27px; height:27px; }
+.drawer-brand-art { display:block; width:100%; height:clamp(168px,47vw,210px); margin:0 0 7px; object-fit:cover; object-position:center 47%; }
+.drawer nav { display:grid; gap:3px; }
+.drawer nav a { display:grid; grid-template-columns:32px minmax(0,1fr) 22px; align-items:center; gap:14px; min-height:58px; padding:8px 14px; border-radius:20px; color:#17110f; text-decoration:none; transition:background-color .15s ease,transform .15s ease; }
+.drawer nav a:hover,.drawer nav a:focus-visible { background:#fff7e8; outline:0; }
+.drawer nav a:active { transform:scale(.985); }
+.drawer nav a.active { background:#fff1cc; }
+.drawer nav a > .drawer-icon { width:29px; height:29px; color:#281914; }
+.drawer nav a.active > .drawer-icon,.drawer nav a.active > .drawer-icon:last-child { color:#ff7900; }
+.drawer nav a > strong { font-size:1.12rem; font-weight:600; }
+.drawer nav a > .drawer-icon:last-child { width:21px; height:21px; justify-self:end; }
+.drawer-footer { position:relative; display:grid; gap:11px; margin-top:13px; padding-top:18px; border-top:1px solid #eae5e1; }
+.drawer-contact { position:relative; z-index:1; display:grid; grid-template-columns:48px minmax(0,1fr); align-items:center; gap:12px; min-height:48px; color:#281914; text-decoration:none; }
+.drawer-contact > span { display:grid; place-items:center; width:48px; height:48px; border-radius:13px; background:#ffb51e; color:#281914; }
+.drawer-contact > span.instagram { background:#ff7900; color:#fff; }
+.drawer-contact .drawer-icon { width:25px; height:25px; }
+.drawer-contact b { font-size:.94rem; font-weight:600; line-height:1.35; }
+.drawer-thank-you { position:relative; z-index:1; display:block; width:min(70%,250px); height:94px; margin-top:2px; object-fit:cover; object-position:center 50%; }
+.drawer-food-art { position:absolute; right:-32px; bottom:-20px; z-index:0; width:48%; height:auto; opacity:.98; pointer-events:none; }
+@keyframes drawer-fade { from { opacity:0; } to { opacity:1; } }
+@keyframes drawer-slide { from { transform:translateX(-102%); } to { transform:translateX(0); } }
+@media (prefers-reduced-motion:reduce) { .drawer-backdrop,.drawer { animation-duration:1ms; } .drawer nav a { transition:none; } }
 
 /* Shared cards */
 .section { margin: 22px 0; }
@@ -294,6 +306,29 @@ html[data-search-filters-open="true"] .site-header,html[data-search-filters-open
 .favorites-page .card-actions button:last-child { margin-top:42px; background:var(--db-gold); border:0; color:var(--db-ink); }
 .favorites-tip { display:flex; align-items:center; gap:12px; margin-top:16px; padding:16px; border-radius:20px; background:linear-gradient(120deg,#fff5da,#fffaf0); }
 .favorites-tip b { display:grid; place-items:center; width:54px; height:54px; flex:none; border-radius:50%; background:#ffe7a5; color:var(--db-gold); font-size:28px; }
+
+/* Delivery, about and order history use public settings or data stored on this device only. */
+.public-info-page,.orders-page { display:grid; gap:15px; }
+.public-info-page > h2 { margin:3px 0 0; font-size:1.55rem; }
+.delivery-zone-list,.about-facts,.orders-list { display:grid; gap:10px; }
+.delivery-zone-list article,.pickup-card,.about-facts article,.orders-list article,.orders-empty { display:grid; gap:5px; padding:16px; border-radius:20px; background:var(--db-soft); }
+.delivery-zone-list b,.pickup-card b,.about-facts b { font-size:1.08rem; }
+.delivery-zone-list span,.pickup-card span,.about-facts span,.orders-list span,.orders-list small,.orders-note,.about-lead { color:var(--db-muted); }
+.delivery-zone-list small,.pickup-card small { color:var(--db-brown); font-weight:750; }
+.pickup-card { background:linear-gradient(115deg,#fff4d5,#fffaf0); }
+.about-brand { display:flex; justify-content:center; padding:22px; border-radius:24px; background:var(--db-chocolate); }
+.about-brand .brand-logo { width:min(100%,260px); padding:0; border-radius:0; }
+.about-lead { margin:0; font-size:1.02rem; line-height:1.5; }
+.orders-page > h1 { margin-bottom:0; }
+.orders-note { margin:0; line-height:1.45; }
+.orders-empty { text-align:center; }
+.orders-empty h2 { margin:0; }
+.orders-empty p { margin:0 0 8px; color:var(--db-muted); }
+.orders-list article { grid-template-columns:minmax(0,1fr) auto; align-items:start; }
+.orders-list article > div { display:grid; gap:4px; }
+.orders-list article > strong { padding:7px 10px; border-radius:999px; background:#fff0c7; white-space:nowrap; }
+.orders-list article > small,.orders-list article > a { grid-column:1 / -1; }
+.orders-list article > a { color:var(--db-orange); font-weight:850; }
 
 /* Checkout and contact */
 .checkout-reference > .checkout-hero { margin-bottom:16px; }
