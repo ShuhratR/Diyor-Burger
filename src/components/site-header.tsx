@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { MobileDrawer } from "./mobile-drawer";
+import { BrandLogo } from "./brand-logo";
 import { DiyorIcon } from "./diyor-icon";
 import { useLanguage } from "@/features/i18n/language-provider";
 import { copy } from "@/lib/i18n";
@@ -26,7 +27,7 @@ export function SiteHeader({ locationLabel }: { locationLabel?: string }) {
 
   return <header className={`site-header ${hasDrawer ? "reference-home" : "reference-detail"}`}>
     {hasDrawer ? <MobileDrawer /> : <button className="reference-back" type="button" onClick={() => router.back()} aria-label="Назад">‹</button>}
-    <Link className="brand reference-wordmark" href="/" aria-label="DIYOR BURGER — главная"><span className="brand-mark" aria-hidden="true"><i>D</i><b>B</b></span><span>DIYOR <b>BURGER</b></span></Link>
+    <Link className="brand reference-wordmark" href="/" aria-label="DIYOR BURGER — главная"><BrandLogo /></Link>
     {pageTitle && <span className="site-header-title">{pageTitle}</span>}
     <nav aria-label="Быстрая навигация">
       {root && locationLabel && <span className="header-location" aria-label="Район доставки"><DiyorIcon name="location-pin"/><span>{locationLabel}</span><b aria-hidden="true">⌄</b></span>}

@@ -1,1 +1,1 @@
-import{LoginForm}from"@/features/admin/login-form";export default function AdminLogin(){return <main className="admin-shell"><section className="admin-card"><b>DIYOR BURGER</b><h1>Вход в админ-панель</h1><LoginForm/></section></main>}
+import{BrandLogo}from"@/components/brand-logo";import{LoginForm}from"@/features/admin/login-form";export default function AdminLogin(){return <main className="admin-shell"><section className="admin-card"><BrandLogo/><h1>Вход в админ-панель</h1><LoginForm/></section></main>}

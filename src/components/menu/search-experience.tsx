@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DiyorIcon, type DiyorIconName } from "@/components/diyor-icon";
 import { FoodImage } from "./food-image";
+import { BrandLogo } from "@/components/brand-logo";
 import { ProductGrid } from "./product-grid";
 import type { Category, Product } from "@/lib/menu/types";
 import { formatSomoni } from "@/lib/money";
@@ -39,7 +40,7 @@ export function SearchExperience({ initialQuery, results, suggestions, categorie
   function applyFilters() { router.push(resultHref(query, draft)); setFiltersOpen(false); }
 
   if (filtersOpen) return <section className="section filter-reference" aria-label="Фильтры меню">
-    <header className="filter-reference-header"><b className="reference-wordmark"><span className="brand-mark"><i>D</i><b>B</b></span><span>DIYOR <b>BURGER</b></span></b><button type="button" onClick={() => setFiltersOpen(false)} aria-label="Закрыть фильтры">×</button></header>
+    <header className="filter-reference-header"><BrandLogo /><button type="button" onClick={() => setFiltersOpen(false)} aria-label="Закрыть фильтры">×</button></header>
     <div className="reference-hero filter-hero"><h1>Фильтры</h1><p>Найдите именно то, что хочется</p><span className="hero-script">Вкусный выбор всегда рядом!</span><FoodImage compact src="/images/hero-burger-v1.png" alt="Бургер DIYOR BURGER"/></div>
     <section className="filter-block"><h2>Категории</h2><div className="filter-category-grid"><button className={!draft.category ? "selected" : ""} onClick={() => setDraft((value) => ({ ...value, category: undefined, pizzaSize: undefined }))}>Все</button>{categories.map((category) => <button className={draft.category === category.slug ? "selected" : ""} key={category.id} onClick={() => setDraft((value) => ({ ...value, category: category.slug, pizzaSize: category.slug === "pizza" ? value.pizzaSize : undefined }))}><DiyorIcon name={categoryIcons[category.slug] ?? "category-other"}/><span>{category.name}</span></button>)}</div></section>
     <section className="filter-block"><div className="filter-block-title"><h2>Диапазон цены</h2><span>{formatSomoni(draft.minPriceDiram ?? 0)} – {formatSomoni(draft.maxPriceDiram ?? maxCatalogPrice)}</span></div><div className="filter-ranges"><label>От<input type="range" min="0" max={maxCatalogPrice} step="100" value={draft.minPriceDiram ?? 0} onChange={(event) => setDraft((value) => ({ ...value, minPriceDiram: Math.min(Number(event.target.value), value.maxPriceDiram ?? maxCatalogPrice) }))}/></label><label>До<input type="range" min="0" max={maxCatalogPrice} step="100" value={draft.maxPriceDiram ?? maxCatalogPrice} onChange={(event) => setDraft((value) => ({ ...value, maxPriceDiram: Math.max(Number(event.target.value), value.minPriceDiram ?? 0) }))}/></label></div></section>
