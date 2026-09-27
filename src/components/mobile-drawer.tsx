@@ -34,7 +34,7 @@ function DrawerIcon({ name }: { name: DrawerIconName }) {
 
 export function MobileDrawer({ contacts = {} }: { contacts?: ContactDetails }) {
   const pathname = usePathname(); const [open, setOpen] = useState(false); const [closing, setClosing] = useState(false);
-  const dialogRef = useRef<HTMLElement>(null); const triggerRef = useRef<HTMLButtonElement>(null); const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dialogRef = useRef<HTMLElement>(null); const triggerRef = useRef<HTMLButtonElement>(null); const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null); const routeRef = useRef(pathname);
   const closeDrawer = useCallback(() => { if (closing) return; setClosing(true); closeTimer.current = setTimeout(() => { setOpen(false); setClosing(false); triggerRef.current?.focus(); }, 250); }, [closing]);
   useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
   useEffect(() => {
@@ -44,12 +44,12 @@ export function MobileDrawer({ contacts = {} }: { contacts?: ContactDetails }) {
     document.body.style.overflow = "hidden"; window.addEventListener("keydown", onKeyDown); requestAnimationFrame(() => focusables()[0]?.focus());
     return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("keydown", onKeyDown); };
   }, [open, closeDrawer]);
+  useEffect(() => { if (routeRef.current === pathname) return; routeRef.current = pathname; if (closeTimer.current) clearTimeout(closeTimer.current); setClosing(false); setOpen(false); }, [pathname]);
   const active = (href: string) => href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
-  const navigateDrawer = () => { if (closeTimer.current) clearTimeout(closeTimer.current); setClosing(false); setOpen(false); };
   const mapHref = contacts.mapUrl || (contacts.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contacts.address)}` : undefined);
   return <><button ref={triggerRef} className="menu-button" onClick={() => { setClosing(false); setOpen(true); }} aria-expanded={open} aria-label="Открыть меню"><span/><span/><span/></button>{open && <div className={`drawer-backdrop${closing ? " is-closing" : ""}`} onClick={closeDrawer}><aside className={`drawer${closing ? " is-closing" : ""}`} ref={dialogRef} role="dialog" aria-modal="true" aria-label="Навигация" onClick={(event) => event.stopPropagation()}>
     <button className="drawer-close" type="button" onClick={closeDrawer} aria-label="Закрыть меню"><DrawerIcon name="close"/></button><Image className="drawer-brand-art" src="/images/drawer-brand-slogan.jpg" alt="DIYOR BURGER — Вкуснее каждый день" width={1280} height={960} priority/>
-    <nav aria-label="Основная навигация">{links.map(({ label, href, icon }) => <Link className={active(href) ? "active" : undefined} key={href} href={href} onClick={navigateDrawer}><DrawerIcon name={icon}/><strong>{label}</strong><DrawerIcon name="chevron"/></Link>)}</nav>
+    <nav aria-label="Основная навигация">{links.map(({ label, href, icon }) => <Link className={active(href) ? "active" : undefined} key={href} href={href}><DrawerIcon name={icon}/><strong>{label}</strong><DrawerIcon name="chevron"/></Link>)}</nav>
     <footer className="drawer-footer">{(contacts.phone1 || contacts.phone2) && <a className="drawer-contact" href={`tel:${(contacts.phone1 || contacts.phone2 || "").replace(/[^+\d]/g, "")}`}><span><DrawerIcon name="phone"/></span><b>{contacts.phone1}{contacts.phone2 && <><br/>{contacts.phone2}</>}</b></a>}{contacts.instagramUrl && <a className="drawer-contact" href={contacts.instagramUrl} target="_blank" rel="noreferrer"><span className="instagram"><DrawerIcon name="instagram"/></span><b>@diyorburger</b></a>}{mapHref && <a className="drawer-contact" href={mapHref} target="_blank" rel="noreferrer"><span><DrawerIcon name="location"/></span><b>{contacts.address}</b></a>}<Image className="drawer-thank-you" src="/images/drawer-thank-you.jpg" alt="Спасибо, что вы с нами!" width={1280} height={960}/><Image className="drawer-food-art" src="/images/hero-burger-v1.png" alt="Бургер, картофель фри и напиток DIYOR BURGER" width={1024} height={1024}/></footer>
   </aside></div>}</>;
 }
