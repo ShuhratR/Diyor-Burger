@@ -3,11 +3,33 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { archiveProduct, saveProduct, toggleProductAvailability } from "./product-actions";
+import { archiveVariant, saveVariant } from "./variant-actions";
 import { AdminImageInput } from "./admin-image-input";
 import type { AdminCategoryOption, AdminProduct } from "./product-manager";
 import "./admin-manager.css";
 
 const Pencil = () => <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16.5-.8 4.3 4.3-.8L19 8.5 15.5 5 4 16.5ZM14 6.5l3.5 3.5"/></svg>;
+
+function PizzaSizes({ product }: { product: AdminProduct }) {
+  const variants = product.variants ?? [];
+  return <section className="admin-pizza-sizes" aria-label="Размеры пиццы">
+    <div><p>РАЗМЕРЫ И ЦЕНЫ</p><h3>Размеры пиццы</h3><span>Меняются здесь же — без перехода на отдельную страницу.</span></div>
+    {variants.map((variant) => <div className="admin-variant-wrap" key={variant.id}><form action={saveVariant} className="admin-variant-row">
+      <input type="hidden" name="id" value={variant.id}/><input type="hidden" name="productId" value={product.id}/>
+      <label>Размер<input name="name" defaultValue={variant.name} required/></label>
+      <label>Цена, сомони<input name="price" defaultValue={String(variant.priceDiram / 100)} inputMode="decimal" required/></label>
+      <input type="hidden" name="nameTj" value={variant.nameTj ?? variant.name}/><input type="hidden" name="sortOrder" value={variant.sortOrder}/>
+      <label className="admin-inline-check"><input name="isAvailable" type="checkbox" defaultChecked={variant.isAvailable}/> В наличии</label>
+      <label className="admin-inline-check"><input name="isActive" type="checkbox" defaultChecked={variant.isActive}/> Видно</label>
+      <button type="submit" aria-label={`Сохранить размер ${variant.name}`}>✓</button>
+    </form><form action={archiveVariant}><input type="hidden" name="id" value={variant.id}/><input type="hidden" name="productId" value={product.id}/><button type="submit" className="admin-icon-danger" aria-label={`Архивировать размер ${variant.name}`}>×</button></form></div>)}
+    <form action={saveVariant} className="admin-variant-row admin-variant-new">
+      <input type="hidden" name="productId" value={product.id}/><input type="hidden" name="nameTj" value=""/><input type="hidden" name="sortOrder" value={variants.length}/>
+      <label>Новый размер<input name="name" placeholder="Например, 36 см" required/></label><label>Цена, сомони<input name="price" placeholder="0" inputMode="decimal" required/></label>
+      <label className="admin-inline-check"><input name="isAvailable" type="checkbox" defaultChecked/> В наличии</label><label className="admin-inline-check"><input name="isActive" type="checkbox" defaultChecked/> Видно</label><button type="submit">＋ Добавить размер</button>
+    </form>
+  </section>;
+}
 
 function Editor({ product, categories, close }: { product?:AdminProduct; categories:AdminCategoryOption[]; close:()=>void }) {
   const [type,setType]=useState<AdminProduct["productType"]>(product?.productType??"NORMAL");
@@ -20,5 +42,5 @@ export function ProductWorkspace({ products, categories }: { products:AdminProdu
   const [current,setCurrent]=useState<AdminProduct|"new"|null>(null);
   const searchParams=useSearchParams();
   useEffect(()=>{if(searchParams.get("new")==="1")setCurrent("new")},[searchParams]);
-  return <section className="admin-workspace"><header className="admin-workspace-head"><div><p>КАТАЛОГ ДЛЯ КЛИЕНТОВ</p><h2>Блюда и цены</h2><span>Нажмите карандаш, чтобы изменить именно эту карточку.</span></div><button className="admin-add" type="button" onClick={()=>setCurrent("new")}>＋ Добавить товар</button></header><div className="admin-product-grid">{products.map(product=><article className="admin-product-card" key={product.id}><div className="admin-product-image">{product.imageUrl?<img src={product.imageUrl} alt=""/>:<b>DIYOR<br/>BURGER</b>}<button type="button" aria-label={`Изменить ${product.name}`} onClick={()=>setCurrent(product)}><Pencil/></button></div><div><span>{product.productType==="PIZZA"?"Пицца":product.productType==="COMBO"?"Комбо":"Блюдо"}</span><em className={product.isAvailable?"ok":"off"}>{product.isAvailable?"В наличии":"Нет в наличии"}</em><h3>{product.name}</h3><p>{product.description||"Описание ещё не заполнено"}</p><strong>{product.basePriceDiram==null?"Цены по размерам":`${product.basePriceDiram/100} сом`}</strong></div></article>)}</div>{current&&<div className="admin-editor-backdrop" onMouseDown={(event)=>{if(event.target===event.currentTarget)setCurrent(null)}}><section className="admin-editor-sheet" role="dialog" aria-modal="true"><header><div><p>{current==="new"?"НОВЫЙ ТОВАР":"РЕДАКТИРОВАНИЕ"}</p><h2>{current==="new"?"Добавить товар":current.name}</h2></div><button type="button" aria-label="Закрыть" onClick={()=>setCurrent(null)}>×</button></header><Editor product={current==="new"?undefined:current} categories={categories} close={()=>setCurrent(null)}/>{current!=="new"&&<footer><form action={toggleProductAvailability}><input name="id" type="hidden" value={current.id}/><input name="current" type="hidden" value={String(current.isAvailable)}/><button>{current.isAvailable?"Снять с наличия":"Вернуть в наличие"}</button></form><form action={archiveProduct}><input name="id" type="hidden" value={current.id}/><button className="danger">Архивировать</button></form></footer>}</section></div>}</section>;
+  return <section className="admin-workspace"><header className="admin-workspace-head"><div><p>КАТАЛОГ ДЛЯ КЛИЕНТОВ</p><h2>Блюда и цены</h2><span>Нажмите карандаш, чтобы изменить именно эту карточку.</span></div><button className="admin-add" type="button" onClick={()=>setCurrent("new")}>＋ Добавить товар</button></header><div className="admin-product-grid">{products.map(product=><article className="admin-product-card" key={product.id}><div className="admin-product-image">{product.imageUrl?<img src={product.imageUrl} alt=""/>:<b>DIYOR<br/>BURGER</b>}<button type="button" aria-label={`Изменить ${product.name}`} onClick={()=>setCurrent(product)}><Pencil/></button></div><div><span>{product.productType==="PIZZA"?"Пицца":product.productType==="COMBO"?"Комбо":"Блюдо"}</span><em className={product.isAvailable?"ok":"off"}>{product.isAvailable?"В наличии":"Нет в наличии"}</em><h3>{product.name}</h3><p>{product.description||"Описание ещё не заполнено"}</p><strong>{product.basePriceDiram==null?"Цены по размерам":`${product.basePriceDiram/100} сом`}</strong></div></article>)}</div>{current&&<div className="admin-editor-backdrop" onMouseDown={(event)=>{if(event.target===event.currentTarget)setCurrent(null)}}><section className="admin-editor-sheet" role="dialog" aria-modal="true"><header><div><p>{current==="new"?"НОВЫЙ ТОВАР":"РЕДАКТИРОВАНИЕ"}</p><h2>{current==="new"?"Добавить товар":current.name}</h2></div><button type="button" aria-label="Закрыть" onClick={()=>setCurrent(null)}>×</button></header><Editor product={current==="new"?undefined:current} categories={categories} close={()=>setCurrent(null)}/>{current!=="new"&&current.productType==="PIZZA"&&<PizzaSizes product={current}/>} {current!=="new"&&<footer><form action={toggleProductAvailability}><input name="id" type="hidden" value={current.id}/><input name="current" type="hidden" value={String(current.isAvailable)}/><button>{current.isAvailable?"Снять с наличия":"Вернуть в наличие"}</button></form><form action={archiveProduct}><input name="id" type="hidden" value={current.id}/><button className="danger">Архивировать</button></form></footer>}</section></div>}</section>;
 }
