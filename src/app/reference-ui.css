@@ -424,6 +424,7 @@ html[data-search-filters-open="true"] .site-header,html[data-search-filters-open
 .whatsapp-ready-reference .ready-process { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:20px 0; padding:18px 10px; border-radius:22px; background:#fff6dd; }
 .whatsapp-ready-reference .ready-process span { font-size:.68rem; font-weight:800; }
 .whatsapp-ready-reference .ready-process b { display:grid; place-items:center; width:44px; height:44px; margin:0 auto 7px; border-radius:50%; background:var(--db-brown); color:#fff; font-size:1.2rem; }
+.whatsapp-ready-reference .ready-fallback { display:inline-block; margin:12px 0 6px; color:var(--db-brown); font-size:.9rem; font-weight:800; text-decoration:underline; text-underline-offset:3px; }
 
 /* Checkout preserves the existing validation and gets an explicit visual composition. */
 .checkout-reference .checkout-hero { min-height:230px; }
