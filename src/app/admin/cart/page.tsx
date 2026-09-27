@@ -6,5 +6,5 @@ import { AdminWorkspaceBar } from "@/features/admin/admin-workspace-bar";
 export default async function AdminCartPage() {
   await requireAdmin();
   const products = await getActiveProducts();
-  return <><AdminWorkspaceBar title="Корзина"/><ReferenceCartView products={products.data ?? []}/></>;
+  return <><AdminWorkspaceBar title="Корзина"/><ReferenceCartView products={products.data ?? []} adminMode/></>;
 }
