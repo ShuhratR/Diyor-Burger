@@ -1,12 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 
 export function NavigationFeedback() {
-  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
-  useEffect(() => { setLoading(false); }, [pathname]);
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
