@@ -52,8 +52,8 @@ body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sa
 .drawer-close { position:absolute; z-index:2; top:calc(14px + env(safe-area-inset-top)); right:16px; display:grid; place-items:center; width:48px; height:48px; padding:0; border:0; border-radius:50%; background:#fff7f1; color:#211713; cursor:pointer; }
 .drawer-close .drawer-icon { width:27px; height:27px; }
 .drawer-brand-art { display:block; width:100%; height:clamp(168px,47vw,210px); margin:0 0 7px; object-fit:cover; object-position:center 47%; }
-.drawer nav { display:grid; width:100%; margin:0; gap:0; justify-items:stretch; }
-.drawer nav a { display:grid; grid-template-columns:32px minmax(0,1fr) 22px; align-items:center; width:100%; margin:0; gap:14px; min-height:60px; padding:8px 10px; border:0 !important; border-radius:18px; background:transparent !important; box-shadow:none !important; color:#17110f; text-decoration:none; transition:background-color .15s ease,transform .15s ease; }
+.drawer nav { display:grid !important; width:100%; margin:0; gap:0; grid-template-columns:minmax(0,1fr) !important; align-content:start; justify-items:stretch; border:0 !important; }
+.drawer nav a { display:grid !important; grid-template-columns:32px minmax(0,1fr) 22px; align-items:center; width:100%; min-width:0; margin:0; gap:14px; min-height:60px; padding:8px 10px; border:0 !important; border-radius:18px; background:transparent !important; box-shadow:none !important; color:#17110f; text-decoration:none; transition:background-color .15s ease,transform .15s ease; }
 .drawer nav a:hover,.drawer nav a:focus-visible { background:#fff7e8; outline:0; }
 .drawer nav a:active { transform:scale(.985); }
 .drawer nav a.active { background:#fff1cc !important; }
