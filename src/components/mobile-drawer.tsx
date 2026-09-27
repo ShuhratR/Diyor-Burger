@@ -46,7 +46,7 @@ export function MobileDrawer({ contacts = {} }: { contacts?: ContactDetails }) {
   }, [open, closeDrawer]);
   useEffect(() => { if (routeRef.current === pathname) return; routeRef.current = pathname; if (closeTimer.current) clearTimeout(closeTimer.current); setClosing(false); setOpen(false); }, [pathname]);
   const adminMode = pathname.startsWith("/admin");
-  const adminHref = (href: string) => href === "/" ? "/admin" : href === "/menu" ? "/admin/products" : href === "/combos" ? "/admin/combos" : href === "/delivery" ? "/admin/delivery" : href === "/settings" ? "/admin/settings" : "/admin/products";
+  const adminHref = (href: string) => href === "/" ? "/admin" : href === "/menu" ? "/admin/products" : href === "/combos" ? "/admin/combos" : href === "/delivery" ? "/admin/delivery" : href === "/favorites" ? "/admin/favorites" : href === "/settings" || href === "/contacts" || href === "/about" ? "/admin/settings" : href === "/orders" ? "/admin/cart" : "/admin/products";
   const active = (href: string) => adminMode ? href === "/" : (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`));
   const mapHref = contacts.mapUrl || (contacts.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contacts.address)}` : undefined);
   return <><button ref={triggerRef} className="menu-button" onClick={() => { setClosing(false); setOpen(true); }} aria-expanded={open} aria-label="Открыть меню"><span/><span/><span/></button>{open && <div className={`drawer-backdrop${closing ? " is-closing" : ""}`} onClick={closeDrawer}><aside className={`drawer${closing ? " is-closing" : ""}`} ref={dialogRef} role="dialog" aria-modal="true" aria-label="Навигация" onClick={(event) => event.stopPropagation()}>
