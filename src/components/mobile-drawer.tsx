@@ -45,7 +45,7 @@ export function MobileDrawer({ contacts = {} }: { contacts?: ContactDetails }) {
     return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("keydown", onKeyDown); };
   }, [open, closeDrawer]);
   useEffect(() => { if (routeRef.current === pathname) return; routeRef.current = pathname; if (closeTimer.current) clearTimeout(closeTimer.current); setClosing(false); setOpen(false); }, [pathname]);
-  const adminMode = pathname === "/admin";
+  const adminMode = pathname.startsWith("/admin");
   const adminHref = (href: string) => href === "/" ? "/admin" : href === "/menu" ? "/admin/products" : href === "/combos" ? "/admin/combos" : href === "/delivery" ? "/admin/delivery" : href === "/settings" ? "/admin/settings" : "/admin/products";
   const active = (href: string) => adminMode ? href === "/" : (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`));
   const mapHref = contacts.mapUrl || (contacts.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contacts.address)}` : undefined);
