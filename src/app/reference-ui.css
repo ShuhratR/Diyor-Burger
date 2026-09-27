@@ -147,6 +147,23 @@ body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sa
 .category-reference .card-actions button:first-child,
 .home-popular .card-actions button:first-child { display:none; }
 .menu-reference .card-actions > :last-child { background:var(--db-gold); border:0; color:var(--db-ink); }
+.menu-reference .menu-product-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:10px; }
+.menu-reference .product-card { min-width:0; border-radius:18px; background:#fff; }
+.menu-reference .product-card > a { display:flex; min-height:100%; flex-direction:column; }
+.menu-reference .product-card .food-image { height:132px; min-height:132px; }
+.menu-reference .product-card-copy { display:flex; min-height:104px; flex:1; flex-direction:column; padding:10px 46px 10px 10px; }
+.menu-reference .product-card h3 { font-size:.88rem; line-height:1.13; }
+.menu-reference .product-card p { display:none; }
+.menu-reference .product-card strong { margin-top:auto; font-size:.78rem; }
+.menu-reference .card-actions { right:8px; bottom:9px; }
+.menu-reference .card-actions button,.menu-reference .card-actions a { width:36px; height:36px; }
+.menu-loading-categories { display:flex; gap:8px; overflow:hidden; margin-bottom:14px; }
+.menu-loading-categories i { width:76px; height:82px; flex:none; border-radius:18px; background:linear-gradient(90deg,#f7f1eb 25%,#fff 40%,#f7f1eb 55%); background-size:220% 100%; animation:menu-skeleton 1.1s linear infinite; }
+.menu-loading-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:10px; }
+.menu-loading-card { min-height:236px; overflow:hidden; border-radius:18px; background:#fff; box-shadow:var(--db-shadow); }
+.menu-loading-card i,.menu-loading-card span,.menu-loading-card b { display:block; margin:10px; border-radius:999px; background:linear-gradient(90deg,#f7f1eb 25%,#fff 40%,#f7f1eb 55%); background-size:220% 100%; animation:menu-skeleton 1.1s linear infinite; }
+.menu-loading-card i { height:132px; margin:0; border-radius:0; }.menu-loading-card span { width:56%; height:13px; }.menu-loading-card b { width:36%; height:27px; margin-top:18px; }
+@keyframes menu-skeleton { to { background-position:-220% 0; } }
 .category-reference .page-hero { margin-bottom:14px; }
 .category-reference .category-product-grid .product-card { min-height:250px; }
 .category-reference[data-category="hotdogs"] .category-product-grid .product-grid,
