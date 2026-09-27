@@ -40,7 +40,7 @@ export function ProductQuickView({ product, onClose }: { product: Product; onClo
         <h2 id={`product-title-${product.id}`}>{name}</h2>
         {description.trim() && <p className="quick-view-description">{description}</p>}
         {product.productType === "COMBO" && product.comboComponents?.length ? <section className="quick-view-section"><h3>Что входит в комбо</h3><ul>{product.comboComponents.map((component) => <li key={component.id}><b>{component.name}</b><span>{component.quantity} шт.{component.description ? ` · ${component.description}` : ""}</span></li>)}</ul></section> : ingredients.trim() && <section className="quick-view-section"><h3>Состав</h3><p>{ingredients}</p></section>}
-        {product.productType === "PIZZA" ? <div className="quick-view-variants"><VariantSelector productId={product.id} variants={product.variants ?? []} /></div> : <><div className="quick-view-price"><strong>{price === undefined ? "—" : formatSomoni(price)}</strong><span className={product.isAvailable ? "in-stock" : "out-of-stock"}>{product.isAvailable ? "В наличии" : t.unavailable}</span></div><ProductPurchase productId={product.id} available={product.isAvailable} /></>}
+        {product.productType === "PIZZA" ? <div className="quick-view-variants"><VariantSelector productId={product.id} productName={name} variants={product.variants ?? []} /></div> : <><div className="quick-view-price"><strong>{price === undefined ? "—" : formatSomoni(price)}</strong><span className={product.isAvailable ? "in-stock" : "out-of-stock"}>{product.isAvailable ? "В наличии" : t.unavailable}</span></div><ProductPurchase productId={product.id} productName={name} available={product.isAvailable} /></>}
       </div>
     </section>
   </div>;
