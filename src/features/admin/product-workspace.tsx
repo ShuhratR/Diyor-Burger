@@ -17,7 +17,7 @@ function PizzaSizes({ product }: { product: AdminProduct }) {
     {variants.map((variant) => <div className="admin-variant-wrap" key={variant.id}><form action={saveVariant} className="admin-variant-row">
       <input type="hidden" name="id" value={variant.id}/><input type="hidden" name="productId" value={product.id}/>
       <label>Размер<input name="name" defaultValue={variant.name} required/></label>
-      <label>Цена, сомони<input name="price" defaultValue={String(variant.priceDiram / 100)} inputMode="decimal" required/></label>
+      <label>Цена, сомони<input name="price" defaultValue={String(variant.priceDiram / 100)} inputMode="decimal" required/></label><label>Старая цена<input name="oldPrice" defaultValue={variant.oldPriceDiram?String(variant.oldPriceDiram/100):""} inputMode="decimal" placeholder="Нет"/></label>
       <input type="hidden" name="nameTj" value={variant.nameTj ?? variant.name}/><input type="hidden" name="sortOrder" value={variant.sortOrder}/>
       <label className="admin-inline-check"><input name="isAvailable" type="checkbox" defaultChecked={variant.isAvailable}/> В наличии</label>
       <label className="admin-inline-check"><input name="isActive" type="checkbox" defaultChecked={variant.isActive}/> Видно</label>
@@ -25,7 +25,7 @@ function PizzaSizes({ product }: { product: AdminProduct }) {
     </form><form action={archiveVariant}><input type="hidden" name="id" value={variant.id}/><input type="hidden" name="productId" value={product.id}/><button type="submit" className="admin-icon-danger" aria-label={`Архивировать размер ${variant.name}`}>×</button></form></div>)}
     <form action={saveVariant} className="admin-variant-row admin-variant-new">
       <input type="hidden" name="productId" value={product.id}/><input type="hidden" name="nameTj" value=""/><input type="hidden" name="sortOrder" value={variants.length}/>
-      <label>Новый размер<input name="name" placeholder="Например, 36 см" required/></label><label>Цена, сомони<input name="price" placeholder="0" inputMode="decimal" required/></label>
+      <label>Новый размер<input name="name" placeholder="Например, 36 см" required/></label><label>Цена, сомони<input name="price" placeholder="0" inputMode="decimal" required/></label><label>Старая цена<input name="oldPrice" placeholder="Нет" inputMode="decimal"/></label>
       <label className="admin-inline-check"><input name="isAvailable" type="checkbox" defaultChecked/> В наличии</label><label className="admin-inline-check"><input name="isActive" type="checkbox" defaultChecked/> Видно</label><button type="submit">＋ Добавить размер</button>
     </form>
   </section>;
