@@ -123,7 +123,7 @@ body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sa
 .added-sheet-cart span { color:var(--db-muted); font-size:.84rem; }
 .added-sheet-cart strong { color:var(--db-ink); }
 .added-sheet .cart-secondary { width:100%; margin-top:10px; }
-.product-card-open { display:block; width:100%; height:100%; padding:0; border:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
+.product-card-open { display:block; width:100%; min-height:0; padding:0; border:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
 .quick-view-backdrop { position:fixed; z-index:80; inset:0; display:grid; place-items:center; padding:16px; background:rgba(18,8,3,.62); backdrop-filter:blur(5px); animation:quick-view-fade .2s ease-out; }
 .quick-view { position:relative; width:min(100%,520px); max-height:calc(100dvh - 32px); overflow:auto; border:1px solid rgba(255,255,255,.16); border-radius:28px; background:#fff; box-shadow:0 24px 64px rgba(18,8,3,.42); animation:quick-view-enter .24s ease-out; }
 .quick-view-close { position:absolute; z-index:2; top:12px; right:12px; display:grid; place-items:center; width:44px; height:44px; padding:0; border:1px solid rgba(255,255,255,.38); border-radius:50%; background:rgba(26,12,5,.7); color:#fff; cursor:pointer; }
@@ -160,9 +160,20 @@ body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sa
 .quick-view .quantity-stepper { background:rgba(255,255,255,.10); }.quick-view .quantity-stepper button { background:rgba(255,255,255,.94); }.quick-view .quantity-stepper b { color:#fff; }.quick-view .quantity-stepper button:last-child { background:#ffbe1d; color:#261207; }.quick-view .purchase-button { box-shadow:0 10px 22px rgba(255,169,17,.22); }
 .quick-view .variant-selector h2 { color:#fff; }.quick-view .variant-selector > div button { border-color:rgba(255,255,255,.20); background:rgba(255,255,255,.07); color:#fff; }.quick-view .variant-selector > div button.selected { border-color:#ffbe1d; background:rgba(255,190,29,.18); }
 @media (max-width:430px) { .quick-view-backdrop { place-items:center; padding:12px; }.quick-view { height:76dvh; max-height:76dvh; grid-template-rows:minmax(255px,43%) minmax(0,1fr); border-radius:25px; }.quick-view-image { border-radius:24px 24px 0 0; }.quick-view-content { padding:16px 16px calc(18px + env(safe-area-inset-bottom)); }.quick-view h2 { font-size:1.8rem; }.quick-view-description { margin:8px 0 12px; font-size:.94rem; }.quick-view-section { margin:9px 0; padding:11px; }.quick-view-price { margin:12px 0 10px; padding:12px 0; }.quick-view .product-purchase { grid-template-columns:112px minmax(0,1fr); } }
+
+/* Every category uses the same catalog card. This is data-agnostic: new admin
+   categories and products inherit the layout without a route-specific rule. */
+.category-reference .category-product-grid .menu-product-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:10px; }
+.category-reference .category-product-grid .product-card { display:block !important; min-height:238px; overflow:hidden; border-radius:18px; background:#fff; }
+.category-reference .category-product-grid .product-card > .product-card-open { display:flex !important; min-height:238px; flex-direction:column; }
+.category-reference .category-product-grid .food-image { grid-column:auto !important; grid-row:auto !important; width:100%; height:132px !important; min-height:132px !important; object-fit:contain; object-position:center; background:radial-gradient(circle at 50% 55%,#6a3418 0,rgba(46,18,8,.96) 68%); }
+.category-reference .category-product-grid .product-card-copy { display:flex; min-height:106px; flex:1; flex-direction:column; padding:10px 44px 10px 10px; }
+.category-reference .category-product-grid .product-card h3 { padding:0; font-size:.88rem; line-height:1.14; }.category-reference .category-product-grid .product-card p { display:none; }.category-reference .category-product-grid .product-card strong { margin-top:auto; font-size:.78rem; }
+.category-reference .category-product-grid .card-actions { right:8px; bottom:9px; }.category-reference .category-product-grid .card-actions button,.category-reference .category-product-grid .card-actions a { width:36px; height:36px; }
+@media (max-width:340px) { .category-reference .category-product-grid .menu-product-grid { gap:8px; }.category-reference .category-product-grid .product-card,.category-reference .category-product-grid .product-card > .product-card-open { min-height:216px; }.category-reference .category-product-grid .food-image { height:116px !important; min-height:116px !important; }.category-reference .category-product-grid .product-card-copy { min-height:100px; padding:8px 40px 8px 8px; }.category-reference .category-product-grid .product-card h3 { font-size:.78rem; } }
 .listing-rows { display:grid; gap:12px; }
 .listing-rows .product-card { display:grid; grid-template-columns:44% minmax(0,1fr); min-height:160px; }
-.listing-rows .product-card > a { display:contents; }
+.listing-rows .product-card > :is(a,.product-card-open) { display:contents; }
 .listing-rows .product-card .food-image { grid-column:1; grid-row:1 / span 2; width:100%; height:100%; min-height:160px; }
 .listing-rows .product-card-copy { grid-column:2; min-height:0; padding:16px 56px 16px 16px; }
 .listing-rows .card-actions { right:12px; bottom:16px; }
@@ -186,7 +197,7 @@ body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sa
 .menu-reference .card-actions > :last-child { background:var(--db-gold); border:0; color:var(--db-ink); }
 .menu-reference .menu-product-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:10px; }
 .menu-reference .product-card { min-width:0; border-radius:18px; background:#fff; }
-.menu-reference .product-card > a { display:flex; min-height:100%; flex-direction:column; }
+.menu-reference .product-card > :is(a,.product-card-open) { display:flex; min-height:100%; flex-direction:column; }
 .menu-reference .product-card .food-image { height:132px; min-height:132px; }
 .menu-reference .product-card-copy { display:flex; min-height:104px; flex:1; flex-direction:column; padding:10px 46px 10px 10px; }
 .menu-reference .product-card h3 { font-size:.88rem; line-height:1.13; }
@@ -209,9 +220,9 @@ body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sa
 .category-reference[data-category="hotdogs"] .product-card,
 .category-reference[data-category="rolls"] .product-card,
 .category-reference[data-category="sides"] .product-card { display:grid; grid-template-columns:43% 1fr; min-height:160px; }
-.category-reference[data-category="hotdogs"] .product-card>a,
-.category-reference[data-category="rolls"] .product-card>a,
-.category-reference[data-category="sides"] .product-card>a { display:contents; }
+.category-reference[data-category="hotdogs"] .product-card>:is(a,.product-card-open),
+.category-reference[data-category="rolls"] .product-card>:is(a,.product-card-open),
+.category-reference[data-category="sides"] .product-card>:is(a,.product-card-open) { display:contents; }
 .category-reference[data-category="hotdogs"] .food-image,
 .category-reference[data-category="rolls"] .food-image,
 .category-reference[data-category="sides"] .food-image { grid-row:1 / span 2; height:100%; min-height:160px; }
@@ -243,7 +254,7 @@ body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sa
 .search-results .filter-row .diyor-icon { width:19px; height:19px; }
 .search-results .product-grid { grid-template-columns:1fr; gap:10px; }
 .search-results .product-card { display:grid; grid-template-columns:43% minmax(0,1fr); min-height:146px; background:linear-gradient(120deg,#1d0a03,#55240d); color:#fff; }
-.search-results .product-card > a { display:contents; }
+.search-results .product-card > :is(a,.product-card-open) { display:contents; }
 .search-results .product-card .food-image { grid-row:1 / span 2; width:100%; height:100%; min-height:146px; border-radius:20px 0 0 20px; }
 .search-results .product-card-copy { min-height:0; padding:15px 58px 11px 14px; }
 .search-results .product-card h3 { color:#fff; }
@@ -351,7 +362,7 @@ html[data-search-filters-open="true"] .site-header,html[data-search-filters-open
 .favorites-page .page-hero h1, .favorites-page .page-hero p { color:var(--db-ink); }
 .favorites-page .product-grid { grid-template-columns:1fr; gap:10px; }
 .favorites-page .product-card { display:grid; grid-template-columns:96px minmax(0,1fr); min-height:116px; }
-.favorites-page .product-card > a { display:contents; }
+.favorites-page .product-card > :is(a,.product-card-open) { display:contents; }
 .favorites-page .product-card .food-image { grid-row:1 / span 2; width:96px; height:100%; min-height:116px; }
 .favorites-page .product-card-copy { min-height:0; padding:14px 60px 10px 14px; }
 .favorites-page .card-actions { top:10px; right:10px; bottom:auto; }
@@ -519,6 +530,15 @@ html[data-route="/checkout/whatsapp"] .section .cta { width:100%; margin:6px 0; 
   .app-shell .home-popular .product-card h3 { font-size:.84rem !important; }
   .app-shell .home-popular .product-card strong { font-size:.75rem !important; }
 }
+
+/* Final category override: all filters share this same resilient card layout. */
+.category-reference .category-product-grid .menu-product-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:10px !important; }
+.category-reference .category-product-grid .product-card { display:block !important; min-height:238px !important; overflow:hidden; border-radius:18px; background:#fff; }
+.category-reference .category-product-grid .product-card > .product-card-open { display:flex !important; min-height:238px !important; flex-direction:column; }
+.category-reference .category-product-grid .food-image { grid-column:auto !important; grid-row:auto !important; width:100% !important; height:132px !important; min-height:132px !important; object-fit:contain !important; object-position:center; background:radial-gradient(circle at 50% 55%,#6a3418 0,rgba(46,18,8,.96) 68%); }
+.category-reference .category-product-grid .product-card-copy { display:flex !important; min-height:106px !important; flex:1; flex-direction:column; padding:10px 44px 10px 10px !important; }
+.category-reference .category-product-grid .product-card h3 { padding:0 !important; font-size:.88rem !important; line-height:1.14; }.category-reference .category-product-grid .product-card p { display:none !important; }.category-reference .category-product-grid .product-card strong { margin-top:auto; font-size:.78rem; }
+.category-reference .category-product-grid .card-actions { right:8px !important; bottom:9px !important; }.category-reference .category-product-grid .card-actions button,.category-reference .category-product-grid .card-actions a { width:36px !important; height:36px !important; }
 
 /* Compact home combo rail: a quick choice, not a full product-detail card. */
 @media (max-width: 600px) {
