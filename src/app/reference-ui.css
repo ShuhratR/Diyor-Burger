@@ -47,13 +47,13 @@ body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sa
 /* Mobile drawer: the supplied artwork stays intact; only its outer whitespace is cropped by the frame. */
 .drawer-backdrop { position:fixed; inset:0; z-index:80; display:flex; background:rgba(0,0,0,.60); backdrop-filter:blur(2px); animation:drawer-fade .25s ease-out both; }
 .drawer-backdrop.is-closing { animation-direction:reverse; }
-.drawer { position:relative; display:flex; flex-direction:column; width:min(86vw,420px); height:100dvh; overflow-x:hidden; overflow-y:auto; padding:calc(12px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom)); border-radius:0 26px 26px 0; background:#fff; box-shadow:24px 0 54px rgba(0,0,0,.24); animation:drawer-slide .25s cubic-bezier(.2,.8,.2,1) both; overscroll-behavior:contain; }
+.drawer { position:relative; display:flex; flex-direction:column; width:min(86vw,420px); height:100dvh; overflow-x:hidden; overflow-y:auto; padding:calc(12px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom)); border-radius:0 26px 26px 0; background:#fff; box-shadow:24px 0 54px rgba(0,0,0,.24); animation:drawer-slide .25s cubic-bezier(.2,.8,.2,1) both; overscroll-behavior:contain; }
 .drawer.is-closing { animation-direction:reverse; }
 .drawer-close { position:absolute; z-index:2; top:calc(14px + env(safe-area-inset-top)); right:16px; display:grid; place-items:center; width:48px; height:48px; padding:0; border:0; border-radius:50%; background:#fff7f1; color:#211713; cursor:pointer; }
 .drawer-close .drawer-icon { width:27px; height:27px; }
 .drawer-brand-art { display:block; width:100%; height:clamp(168px,47vw,210px); margin:0 0 7px; object-fit:cover; object-position:center 47%; }
-.drawer nav { display:grid; gap:0; }
-.drawer nav a { display:grid; grid-template-columns:32px minmax(0,1fr) 22px; align-items:center; gap:14px; min-height:60px; padding:8px 14px; border:0 !important; border-radius:18px; background:transparent !important; box-shadow:none !important; color:#17110f; text-decoration:none; transition:background-color .15s ease,transform .15s ease; }
+.drawer nav { display:grid; width:100%; margin:0; gap:0; justify-items:stretch; }
+.drawer nav a { display:grid; grid-template-columns:32px minmax(0,1fr) 22px; align-items:center; width:100%; margin:0; gap:14px; min-height:60px; padding:8px 10px; border:0 !important; border-radius:18px; background:transparent !important; box-shadow:none !important; color:#17110f; text-decoration:none; transition:background-color .15s ease,transform .15s ease; }
 .drawer nav a:hover,.drawer nav a:focus-visible { background:#fff7e8; outline:0; }
 .drawer nav a:active { transform:scale(.985); }
 .drawer nav a.active { background:#fff1cc !important; }
@@ -68,7 +68,6 @@ body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sa
 .drawer-contact .drawer-icon { width:25px; height:25px; }
 .drawer-contact b { font-size:.94rem; font-weight:600; line-height:1.35; }
 .drawer-thank-you { position:relative; z-index:1; display:block; width:min(70%,250px); height:94px; margin-top:2px; object-fit:cover; object-position:center 50%; }
-.drawer-food-art { position:absolute; right:-32px; bottom:-20px; z-index:0; width:48%; height:auto; opacity:.98; pointer-events:none; }
 @keyframes drawer-fade { from { opacity:0; } to { opacity:1; } }
 @keyframes drawer-slide { from { transform:translateX(-102%); } to { transform:translateX(0); } }
 @media (prefers-reduced-motion:reduce) { .drawer-backdrop,.drawer { animation-duration:1ms; } .drawer nav a { transition:none; } }
