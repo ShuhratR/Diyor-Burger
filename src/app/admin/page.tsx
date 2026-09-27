@@ -1,1 +1,23 @@
-import Link from"next/link";import{requireAdmin}from"@/lib/auth/admin";import{AdminShell}from"@/features/admin/admin-shell";import{getActiveCategories,getActiveProducts,getActiveDeliveryZones,getPublicRestaurantSettings,getCheckoutRestaurantSettings}from"@/lib/menu/catalog";import{dashboard}from"@/lib/admin/dashboard";export default async function AdminPage(){await requireAdmin();const[p,c,z,s,privateSettings]=await Promise.all([getActiveProducts(),getActiveCategories(),getActiveDeliveryZones(),getPublicRestaurantSettings(),getCheckoutRestaurantSettings()]);if(!p.data||!c.data||!z.data||!s.data||!privateSettings.data)return <AdminShell title="Главная"><section className="admin-card"><h2>Управление DIYOR BURGER</h2><p>Не удалось загрузить данные админ-панели. Попробуйте обновить страницу.</p></section></AdminShell>;const d=dashboard(p.data,c.data,z.data,{...s.data,orderWhatsApp:privateSettings.data.whatsapp});return <AdminShell title="Главная"><section className="admin-card"><h2>Управление DIYOR BURGER</h2><p>Меняйте меню, цены, доставку, баннеры и контакты.</p>{Object.entries(d.metrics).map(([k,v])=><p key={k}>{k}: <b>{v}</b></p>)}<h2>Требует внимания</h2>{d.warnings.length?d.warnings.map(w=><p key={w}>{w}</p>):<p>Основные настройки заполнены</p>}{[["/admin/products","Товары"],["/admin/combos","Комбо"],["/admin/delivery","Доставка"],["/admin/banners","Баннеры"],["/admin/settings","Настройки"],["/admin/categories","Категории"]].map(([href,label])=><Link className="cta" key={href} href={href}>{label}</Link>)}</section></AdminShell>}
+import Link from "next/link";
+import { requireAdmin } from "@/lib/auth/admin";
+import { AdminShell } from "@/features/admin/admin-shell";
+import { getActiveCategories, getActiveProducts, getActiveDeliveryZones, getPublicRestaurantSettings, getCheckoutRestaurantSettings } from "@/lib/menu/catalog";
+import { dashboard } from "@/lib/admin/dashboard";
+
+const sections = [
+  ["/admin/products", "Блюда", "Цены, фото, наличие и описание", "🍔"],
+  ["/admin/combos", "Комбо", "Состав и выгодные наборы", "🍟"],
+  ["/admin/banners", "Главный экран", "Баннеры и фотографии", "✦"],
+  ["/admin/categories", "Категории", "Разделы каталога", "▦"],
+  ["/admin/delivery", "Доставка", "Зоны и стоимость", "⌁"],
+  ["/admin/settings", "Ресторан", "Логотип, контакты и самовывоз", "⚙"],
+] as const;
+
+export default async function AdminPage() {
+  await requireAdmin();
+  const [products, categories, zones, settings, privateSettings] = await Promise.all([getActiveProducts(), getActiveCategories(), getActiveDeliveryZones(), getPublicRestaurantSettings(), getCheckoutRestaurantSettings()]);
+  if (!products.data || !categories.data || !zones.data || !settings.data || !privateSettings.data) return <AdminShell title="Главная"><section className="admin-card"><h2>Данные временно недоступны</h2><p>Обновите страницу или проверьте подключение к базе.</p></section></AdminShell>;
+  const state = dashboard(products.data, categories.data, zones.data, { ...settings.data, orderWhatsApp: privateSettings.data.whatsapp });
+  const metrics = [["Блюда", state.metrics.products], ["Комбо", state.metrics.combos], ["Категории", state.metrics.categories], ["Зоны", state.metrics.zones]];
+  return <AdminShell title="Главная"><section className="admin-home"><div className="admin-home-hero"><p>DIYOR BURGER · УПРАВЛЕНИЕ</p><h2>Что хотите изменить?</h2><span>Выберите раздел — все изменения сразу попадут к клиентам после сохранения.</span><Link href="/admin/products">＋ Добавить блюдо</Link></div><div className="admin-metrics">{metrics.map(([label,value])=><div key={label}><b>{value}</b><span>{label}</span></div>)}</div>{state.warnings.length>0&&<section className="admin-attention"><b>Требует внимания</b>{state.warnings.map((warning)=><span key={warning}>{warning}</span>)}</section>}<div className="admin-section-grid">{sections.map(([href,title,description,icon])=><Link href={href} key={href}><i aria-hidden="true">{icon}</i><div><b>{title}</b><span>{description}</span></div><em>→</em></Link>)}</div></section></AdminShell>;
+}
