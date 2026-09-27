@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { archiveProduct, saveProduct, toggleProductAvailability } from "./product-actions";
 import { AdminImageInput } from "./admin-image-input";
 import type { AdminCategoryOption, AdminProduct } from "./product-manager";
@@ -17,5 +18,7 @@ function Editor({ product, categories, close }: { product?:AdminProduct; categor
 
 export function ProductWorkspace({ products, categories }: { products:AdminProduct[]; categories:AdminCategoryOption[] }) {
   const [current,setCurrent]=useState<AdminProduct|"new"|null>(null);
+  const searchParams=useSearchParams();
+  useEffect(()=>{if(searchParams.get("new")==="1")setCurrent("new")},[searchParams]);
   return <section className="admin-workspace"><header className="admin-workspace-head"><div><p>КАТАЛОГ ДЛЯ КЛИЕНТОВ</p><h2>Блюда и цены</h2><span>Нажмите карандаш, чтобы изменить именно эту карточку.</span></div><button className="admin-add" type="button" onClick={()=>setCurrent("new")}>＋ Добавить товар</button></header><div className="admin-product-grid">{products.map(product=><article className="admin-product-card" key={product.id}><div className="admin-product-image">{product.imageUrl?<img src={product.imageUrl} alt=""/>:<b>DIYOR<br/>BURGER</b>}<button type="button" aria-label={`Изменить ${product.name}`} onClick={()=>setCurrent(product)}><Pencil/></button></div><div><span>{product.productType==="PIZZA"?"Пицца":product.productType==="COMBO"?"Комбо":"Блюдо"}</span><em className={product.isAvailable?"ok":"off"}>{product.isAvailable?"В наличии":"Нет в наличии"}</em><h3>{product.name}</h3><p>{product.description||"Описание ещё не заполнено"}</p><strong>{product.basePriceDiram==null?"Цены по размерам":`${product.basePriceDiram/100} сом`}</strong></div></article>)}</div>{current&&<div className="admin-editor-backdrop" onMouseDown={(event)=>{if(event.target===event.currentTarget)setCurrent(null)}}><section className="admin-editor-sheet" role="dialog" aria-modal="true"><header><div><p>{current==="new"?"НОВЫЙ ТОВАР":"РЕДАКТИРОВАНИЕ"}</p><h2>{current==="new"?"Добавить товар":current.name}</h2></div><button type="button" aria-label="Закрыть" onClick={()=>setCurrent(null)}>×</button></header><Editor product={current==="new"?undefined:current} categories={categories} close={()=>setCurrent(null)}/>{current!=="new"&&<footer><form action={toggleProductAvailability}><input name="id" type="hidden" value={current.id}/><input name="current" type="hidden" value={String(current.isAvailable)}/><button>{current.isAvailable?"Снять с наличия":"Вернуть в наличие"}</button></form><form action={archiveProduct}><input name="id" type="hidden" value={current.id}/><button className="danger">Архивировать</button></form></footer>}</section></div>}</section>;
 }
