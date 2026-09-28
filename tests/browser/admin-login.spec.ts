@@ -64,6 +64,6 @@ test("configured-data failure is visible without revealing credentials", async (
   await page.getByLabel("Email администратора").fill("demo@example.invalid");
   await page.getByLabel("Пароль", { exact: true }).fill("example-only-not-real");
   await page.getByRole("button", { name: "Войти в админ-панель" }).click();
-  await expect(page.getByRole("alert")).toContainText("Админ-панель пока не подключена");
+  await expect(page.locator("#admin-login-error")).toContainText("Админ-панель пока не подключена");
   await expect(page).toHaveURL(/\/admin\/login/);
 });
