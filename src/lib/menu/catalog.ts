@@ -262,7 +262,7 @@ export async function getCheckoutRestaurantSettings() {
     source: "supabase" as const,
     data: {
       name: String(row.restaurant_name),
-      whatsapp: String(row.order_whatsapp_number ?? ""),
+      whatsapp: String(row.order_whatsapp_number ?? "").replace(/\D/g, ""),
       pickupEnabled: Boolean(row.pickup_enabled),
       pickupAddress: row.pickup_address as string | undefined,
     },
