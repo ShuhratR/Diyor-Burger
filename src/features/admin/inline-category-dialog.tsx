@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
 import { createCategoryForProduct } from "./category-actions";
 import { AdminImageInput } from "./admin-image-input";
 import { useAdminSave } from "./admin-submit";
@@ -18,7 +17,6 @@ export function InlineCategoryDialog({
   onCreated: (category: AdminCategoryOption) => void;
   onClose: () => void;
 }) {
-  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -30,7 +28,6 @@ export function InlineCategoryDialog({
     action: createCategoryForProduct,
     onSuccess: category => {
       onCreated(category);
-      router.refresh();
     },
     successTitle: "Раздел создан и выбран для товара",
     errorTitle: "Не удалось создать раздел",
