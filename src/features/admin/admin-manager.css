@@ -577,3 +577,14 @@
 
 .admin-form-error { margin: 4px 0; padding: 10px 12px; border: 1px solid #f4b6ae; border-radius: 10px; background: #fff0ed; color: #a32c1d; font-size: .85rem; font-weight: 700; }
 .admin-save:disabled, .admin-sheet-save:disabled { opacity: .55; cursor: wait; }
+
+
+/* New category can be created without abandoning the unsaved product form. */
+.admin-editor-sheet > header h2 { color:#fffaf0; }
+.admin-inline-category { display:grid;gap:7px;min-width:0; }
+.admin-inline-category>label { color:#402010;font-size:.88rem;font-weight:800; }
+.admin-inline-category>select { display:block;width:100%;min-width:0;min-height:48px;padding:10px 12px;border:1px solid #dcccc0;border-radius:11px;background:#fff;color:#24140d;font-size:16px; }
+.admin-inline-category-add {width:100%;min-height:44px;padding:10px 13px;border:1px dashed #d79b36;border-radius:11px;background:#fff3d5;color:#6d3d09;text-align:center;font-size:.85rem;font-weight:900;cursor:pointer;}
+.admin-inline-category-add:focus-visible { outline:3px solid #fcbf38;outline-offset:2px; }
+.admin-inline-category>small { color:#766559;font-size:.74rem;line-height:1.4; }
+.admin-category-image-note { margin:0;padding:10px;border-radius:10px;background:#fff2d3;color:#704409;font-size:.8rem;font-weight:750; }
