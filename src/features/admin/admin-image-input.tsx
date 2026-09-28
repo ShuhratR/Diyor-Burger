@@ -15,10 +15,14 @@ export function AdminImageInput({
   name = "imageUrl",
   defaultValue = "",
   prefix,
+  onUrlChange,
+  onUploadingChange,
 }: {
   name?: string;
   defaultValue?: string;
   prefix: RestaurantMediaPrefix;
+  onUrlChange?: (url: string) => void;
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   const [url, setUrl] = useState(defaultValue);
   const [state, setState] = useState<"idle" | "uploading" | "error">("idle");
@@ -38,6 +42,7 @@ export function AdminImageInput({
       return;
     }
     setState("uploading");
+    onUploadingChange?.(true);
     setError("");
     try {
       const path = restaurantMediaPath(prefix, file.type, crypto.randomUUID());
@@ -51,6 +56,7 @@ export function AdminImageInput({
       }
       const { data } = client.storage.from(RESTAURANT_MEDIA_BUCKET).getPublicUrl(path);
       setUrl(data.publicUrl);
+      onUrlChange?.(data.publicUrl);
       setState("idle");
     } catch (cause) {
       setError(
@@ -59,6 +65,8 @@ export function AdminImageInput({
         }),
       );
       setState("error");
+    } finally {
+      onUploadingChange?.(false);
     }
   }
 
@@ -84,7 +92,7 @@ export function AdminImageInput({
       {url && (
         <div className="admin-image-preview">
           <img src={url} alt="Предпросмотр изображения" />
-          <button type="button" onClick={() => setUrl("")}>Убрать</button>
+          <button type="button" onClick={() => { setUrl(""); onUrlChange?.(""); }}>Убрать</button>
         </div>
       )}
     </div>
