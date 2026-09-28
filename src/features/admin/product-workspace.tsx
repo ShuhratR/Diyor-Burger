@@ -263,7 +263,7 @@ function Editor({
             name="slug"
             required
             pattern="[a-z0-9-]+"
-            defaultValue={product?.slug}
+            defaultValue={product?.slug ?? `dish-${Date.now()}`}
           />
         </label>
       </details>

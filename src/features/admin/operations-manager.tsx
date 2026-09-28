@@ -107,25 +107,24 @@ function ZoneForm({ zone, close }: { zone?: Zone; close: () => void }) {
     <form
       action={saveZone}
       className="admin-form admin-editor"
-      onSubmit={close}
     >
       {z && <input type="hidden" name="id" value={z.id} />}
       <div className="admin-form-grid">
         <label>
-          Название зоны
-          <input name="name" required defaultValue={z?.name} />
+          Район или адрес доставки
+          <input name="name" required defaultValue={z?.name} placeholder="Например, Центр Душанбе" />
         </label>
         <label>
           Название TJ
           <input name="nameTj" defaultValue={z?.nameTj ?? ""} />
         </label>
         <label>
-          Slug
+          Служебный код (создан автоматически)
           <input
             name="slug"
             required
             pattern="[a-z0-9-]+"
-            defaultValue={z?.slug}
+            defaultValue={z?.slug ?? `zone-${Date.now()}`}
           />
         </label>
         <label>
@@ -247,7 +246,6 @@ function BannerForm({ banner, close }: { banner?: Banner; close: () => void }) {
     <form
       action={saveBanner}
       className="admin-form admin-editor"
-      onSubmit={close}
     >
       {b && <input type="hidden" name="id" value={b.id} />}
       <div className="admin-form-grid">
@@ -388,7 +386,6 @@ export function SettingsForm({
     <form
       action={saveSettings}
       className="admin-form admin-editor"
-      onSubmit={close}
     >
       <div className="admin-form-grid">
         <label>
