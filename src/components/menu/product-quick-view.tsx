@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
+import "./product-quick-view.css";
 import { DiyorIcon } from "@/components/diyor-icon";
 import { useLanguage } from "@/features/i18n/language-provider";
 import { FoodImage } from "./food-image";
@@ -23,16 +25,42 @@ export function ProductQuickView({ product, onClose }: { product: Product; onClo
   const imageStyle = product.imageUrl ? { "--quick-view-image": `url("${product.imageUrl}")` } as CSSProperties : undefined;
 
   useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    const previousOverscroll = document.body.style.overscrollBehavior;
     document.body.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
     closeButton.current?.focus();
-    window.addEventListener("keydown", onKeyDown);
-    return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("keydown", onKeyDown); };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const dialog = closeButton.current?.closest('[role="dialog"]');
+      const focusable = dialog?.querySelectorAll<HTMLElement>(
+        'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.body.style.overscrollBehavior = previousOverscroll;
+      document.removeEventListener("keydown", onKeyDown);
+      opener?.focus({ preventScroll: true });
+    };
   }, [onClose]);
 
-  return <div className="quick-view-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-    <section className={`quick-view quick-view-${product.productType.toLowerCase()}`} role="dialog" aria-modal="true" aria-labelledby={`product-title-${product.id}`}>
+  return createPortal(<div className="quick-view-backdrop quick-view-layer" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <section className={`quick-view quick-view-modal quick-view-${product.productType.toLowerCase()}`} role="dialog" aria-modal="true" aria-labelledby={`product-title-${product.id}`}>
       <button ref={closeButton} type="button" className="quick-view-close" onClick={onClose} aria-label="Закрыть карточку товара"><DiyorIcon name="close-x" /></button>
       <div className="quick-view-image" style={imageStyle}><FoodImage src={product.imageUrl} alt={name} compact /></div>
       <div className="quick-view-content">
@@ -43,5 +71,5 @@ export function ProductQuickView({ product, onClose }: { product: Product; onClo
         {product.productType === "PIZZA" ? <div className="quick-view-variants"><VariantSelector productId={product.id} productName={name} variants={product.variants ?? []} /></div> : <><div className="quick-view-price"><strong>{price === undefined ? "—" : formatSomoni(price)}</strong>{price !== undefined && product.oldPriceDiram != null && product.oldPriceDiram > price && <del>{formatSomoni(product.oldPriceDiram)}</del>}<span className={product.isAvailable ? "in-stock" : "out-of-stock"}>{product.isAvailable ? "В наличии" : t.unavailable}</span></div><ProductPurchase productId={product.id} productName={name} available={product.isAvailable} /></>}
       </div>
     </section>
-  </div>;
+  </div>, document.body);
 }
