@@ -433,7 +433,7 @@ export function SettingsForm({
           <input
             name="openTime"
             type="time"
-            defaultValue={settings.openTime ?? ""}
+            defaultValue={settings.openTime?.slice(0, 5) ?? ""}
           />
         </label>
         <label>
@@ -441,7 +441,7 @@ export function SettingsForm({
           <input
             name="closeTime"
             type="time"
-            defaultValue={settings.closeTime ?? ""}
+            defaultValue={settings.closeTime?.slice(0, 5) ?? ""}
           />
         </label>
       </div>

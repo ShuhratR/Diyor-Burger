@@ -49,6 +49,7 @@ export function VariantSelector({
             >
               {v.name}
               <b>{formatSomoni(v.priceDiram)}</b>
+              {v.oldPriceDiram != null && v.oldPriceDiram > v.priceDiram && <del>{formatSomoni(v.oldPriceDiram)}</del>}
               {!available && <small>Нет в наличии</small>}
             </button>
           );

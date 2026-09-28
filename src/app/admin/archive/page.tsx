@@ -6,7 +6,7 @@ import { restoreArchived } from "@/features/admin/archive-actions";
 type Entry = {
   id: string;
   name: string;
-  kind: "products" | "categories" | "delivery_zones" | "banners";
+  kind: "products" | "product_variants" | "categories" | "delivery_zones" | "banners";
   label: string;
   archivedAt: string;
 };
@@ -14,10 +14,14 @@ export default async function ArchivePage() {
   await requireAdmin();
   const client = await createSupabaseServerClient();
   if (!client) return <p className="notice">Данные недоступны</p>;
-  const [products, categories, zones, banners] = await Promise.all([
+  const [products, variants, categories, zones, banners] = await Promise.all([
     client
       .from("products")
       .select("id,name,product_type,archived_at")
+      .not("archived_at", "is", null),
+    client
+      .from("product_variants")
+      .select("id,name,archived_at")
       .not("archived_at", "is", null),
     client
       .from("categories")
@@ -38,6 +42,13 @@ export default async function ArchivePage() {
       name: String(x.name),
       kind: "products" as const,
       label: x.product_type === "COMBO" ? "Комбо" : "Товар",
+      archivedAt: String(x.archived_at),
+    })),
+    ...(variants.data ?? []).map((x) => ({
+      id: String(x.id),
+      name: String(x.name),
+      kind: "product_variants" as const,
+      label: "Размер пиццы",
       archivedAt: String(x.archived_at),
     })),
     ...(categories.data ?? []).map((x) => ({
