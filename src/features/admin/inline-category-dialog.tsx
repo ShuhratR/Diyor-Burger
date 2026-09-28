@@ -36,8 +36,9 @@ export function InlineCategoryDialog({
     errorTitle: "Не удалось создать раздел",
   });
 
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
   useEffect(() => {
-    inputRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !pending && !uploading) {
         event.preventDefault();
