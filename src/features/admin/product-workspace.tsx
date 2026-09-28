@@ -10,6 +10,8 @@ import {
 } from "./product-actions";
 import { archiveVariant, saveVariant } from "./variant-actions";
 import { AdminImageInput } from "./admin-image-input";
+import { useFeedback } from "@/features/feedback/feedback-provider";
+import { useAdminSave } from "./admin-submit";
 import type { AdminCategoryOption, AdminProduct } from "./product-manager";
 import "./admin-manager.css";
 
@@ -21,6 +23,8 @@ const Pencil = () => (
 
 function PizzaSizes({ product }: { product: AdminProduct }) {
   const variants = product.variants ?? [];
+  const router = useRouter();
+  const saved = useAdminSave({action: saveVariant, onSuccess: () => router.refresh(), successTitle: "Размер и цена сохранены", errorTitle: "Не удалось сохранить размер"});
   return (
     <section className="admin-pizza-sizes" aria-label="Размеры пиццы">
       <div>
@@ -30,7 +34,7 @@ function PizzaSizes({ product }: { product: AdminProduct }) {
       </div>
       {variants.map((variant) => (
         <div className="admin-variant-wrap" key={variant.id}>
-          <form action={saveVariant} className="admin-variant-row">
+          <form action={saved.submit} aria-busy={saved.pending} className="admin-variant-row">
             <input type="hidden" name="id" value={variant.id} />
             <input type="hidden" name="productId" value={product.id} />
             <label>
@@ -83,6 +87,7 @@ function PizzaSizes({ product }: { product: AdminProduct }) {
             </label>
             <button
               type="submit"
+              disabled={saved.pending}
               aria-label={`Сохранить размер ${variant.name}`}
             >
               ✓
@@ -102,7 +107,8 @@ function PizzaSizes({ product }: { product: AdminProduct }) {
         </div>
       ))}
       <form
-        action={saveVariant}
+        action={saved.submit}
+        aria-busy={saved.pending}
         className="admin-variant-row admin-variant-new"
       >
         <input type="hidden" name="productId" value={product.id} />
@@ -126,8 +132,9 @@ function PizzaSizes({ product }: { product: AdminProduct }) {
         <label className="admin-inline-check">
           <input name="isActive" type="checkbox" defaultChecked /> Видно
         </label>
-        <button type="submit">＋ Добавить размер</button>
+        <button type="submit" disabled={saved.pending}>{saved.pending ? "Сохранение…" : "＋ Добавить размер"}</button>
       </form>
+      {saved.error && <p className="admin-form-error" role="alert">{saved.error}</p>}
     </section>
   );
 }
@@ -136,10 +143,12 @@ function Editor({
   product,
   categories,
   onSaved,
+  pending,
 }: {
   product?: AdminProduct;
   categories: AdminCategoryOption[];
   onSaved: (formData: FormData) => Promise<void>;
+  pending: boolean;
 }) {
   const [type, setType] = useState<AdminProduct["productType"]>(
     product?.productType ?? "NORMAL",
@@ -157,7 +166,7 @@ function Editor({
   );
   const pizza = type === "PIZZA";
   return (
-    <form action={onSaved} className="admin-form admin-editor">
+    <form action={onSaved} aria-busy={pending} className="admin-form admin-editor">
       {product && <input type="hidden" name="id" value={product.id} />}
       <div className="admin-form-grid">
         <label>
@@ -298,8 +307,8 @@ function Editor({
         </label>
       </div>
       <input name="sortOrder" type="hidden" value={product?.sortOrder ?? 0} />
-      <button className="admin-save">
-        ✓ {product ? "Сохранить изменения" : "Добавить товар"}
+      <button className="admin-save" disabled={pending}>
+        {pending ? "Сохранение…" : `✓ ${product ? "Сохранить изменения" : "Добавить товар"}`}
       </button>
     </form>
   );
@@ -314,6 +323,9 @@ export function ProductWorkspace({
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const feedback = useFeedback();
+  const [savePending, setSavePending] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [current, setCurrent] = useState<AdminProduct | "new" | null>(() =>
     searchParams.get("edit")
       ? products.find((product) => product.id === searchParams.get("edit")) ?? null
@@ -322,12 +334,28 @@ export function ProductWorkspace({
         : null,
   );
   const saveAndContinue = async (formData: FormData) => {
-    const result = await saveProduct(formData);
-    if (result?.id) {
-      window.location.assign(`/admin/products?edit=${result.id}`);
-      return;
+    if (savePending) return;
+    setSavePending(true);
+    setSaveError("");
+    try {
+      const result = await saveProduct(formData);
+      const newPizza = current === "new" && formData.get("productType") === "PIZZA";
+      if (newPizza && result?.id) {
+        feedback.notify("Основа пиццы сохранена", "Теперь добавьте размеры и цены.");
+        window.location.assign(`/admin/products?edit=${result.id}`);
+        return;
+      }
+      setCurrent(null);
+      router.replace("/admin/products");
+      router.refresh();
+      feedback.notify(current === "new" ? "Товар опубликован" : "Изменения сохранены");
+    } catch {
+      const message = "Проверьте обязательные поля и повторите попытку.";
+      setSaveError(message);
+      feedback.notify("Не удалось сохранить товар", message);
+    } finally {
+      setSavePending(false);
     }
-    router.refresh();
   };
   return (
     <section className="admin-workspace">
@@ -423,7 +451,9 @@ export function ProductWorkspace({
               product={current === "new" ? undefined : current}
               categories={categories}
               onSaved={saveAndContinue}
+              pending={savePending}
             />
+            {saveError && <p className="admin-form-error" role="alert">{saveError}</p>}
             {current !== "new" && current.productType === "PIZZA" && (
               <PizzaSizes product={current} />
             )}{" "}
