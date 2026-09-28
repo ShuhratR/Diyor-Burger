@@ -186,13 +186,16 @@ export async function getActiveBanners(): Promise<
     })),
   };
 }
-export async function searchProducts(query: string, filters?: ProductFilters) {
-  const rows = await fromSupabase();
+export async function searchProducts(query: string, filters?: ProductFilters, categories?: Category[]) {
+  const [rows, categoriesState] = await Promise.all([
+    fromSupabase(),
+    categories ? Promise.resolve(null) : getActiveCategories(),
+  ]);
   const all = rows ?? (demoAllowed ? fixtureProducts : null);
   if (!all) return { source: "unavailable" as const, data: null };
   return {
     source: rows ? ("supabase" as const) : ("development-fixture" as const),
-    data: filterProducts(searchMatches(all, query), filters),
+    data: filterProducts(searchMatches(all, query, categories ?? categoriesState?.data ?? []), filters),
   };
 }
 export async function getPublicRestaurantSettings(): Promise<
