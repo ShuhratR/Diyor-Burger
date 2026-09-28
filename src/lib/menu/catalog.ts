@@ -1,25 +1,318 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fixtureCategories, fixtureProducts } from "./fixture";
-import { activeVariants, filterProducts, searchMatches, sortedComboComponents } from "./logic";
-import type { Category, MenuDataState, Product, ProductFilters, PublicDeliveryZone, PublicRestaurantSettings } from "./types";
+import {
+  activeVariants,
+  filterProducts,
+  searchMatches,
+  sortedComboComponents,
+} from "./logic";
+import type {
+  Category,
+  MenuDataState,
+  Product,
+  ProductFilters,
+  PublicBanner,
+  PublicDeliveryZone,
+  PublicRestaurantSettings,
+} from "./types";
 
 const demoAllowed = process.env.NODE_ENV !== "production";
-function demo<T>(data: T): MenuDataState<T> { return demoAllowed ? { source:"development-fixture", data } : { source:"unavailable", data:null }; }
-function mapProduct(row: Record<string, unknown>): Product { const variants=Array.isArray(row.product_variants)?row.product_variants as Record<string,unknown>[]:[];const components=Array.isArray(row.combo_components)?row.combo_components as Record<string,unknown>[]:[];return { id:String(row.id),categoryId:String(row.category_id),name:String(row.name),nameTj:row.name_tj as string|undefined,slug:String(row.slug),productType:row.product_type as Product["productType"],description:String(row.description ?? ""),descriptionTj:row.description_tj as string|undefined,ingredientsText:String(row.ingredients_text ?? ""),ingredientsTextTj:row.ingredients_text_tj as string|undefined,imageUrl:row.image_url as string | undefined,basePriceDiram:row.base_price_diram as number | undefined,oldPriceDiram:row.old_price_diram as number|undefined,promotionLabel:row.promotion_label as string|undefined,isAvailable:Boolean(row.is_available),isActive:Boolean(row.is_active),isPopular:Boolean(row.is_popular),sortOrder:Number(row.sort_order),variants:variants.map((x)=>({id:String(x.id),name:String(x.name),nameTj:x.name_tj as string|undefined,priceDiram:Number(x.price_diram),oldPriceDiram:x.old_price_diram as number|undefined,isActive:Boolean(x.is_active),isAvailable:x.is_available===undefined?true:Boolean(x.is_available),sortOrder:Number(x.sort_order)})),comboComponents:components.filter((x)=>!x.archived_at).map((x)=>({id:String(x.id),name:String(x.name),nameTj:x.name_tj as string|undefined,description:x.description as string|undefined,descriptionTj:x.description_tj as string|undefined,quantity:Number(x.quantity),sortOrder:Number(x.sort_order)})) }; }
-async function fromSupabase(): Promise<Product[] | null> { const client = await createSupabaseServerClient(); if (!client) return null; const { data, error } = await client.from("products").select("*, product_variants(*), combo_components!combo_components_product_id_fkey(*)").eq("is_active",true).is("archived_at",null); if (error) return null; return (data as Record<string,unknown>[]).map(mapProduct); }
-export async function getActiveCategories(): Promise<MenuDataState<Category[]>> { const client = await createSupabaseServerClient(); if (!client) return demo(fixtureCategories.filter((c)=>c.isActive).sort((a,b)=>a.sortOrder-b.sortOrder)); const {data,error}=await client.from("categories").select("*").eq("is_active",true).is("archived_at",null).order("sort_order"); if(error)return demo(fixtureCategories.filter((c)=>c.isActive).sort((a,b)=>a.sortOrder-b.sortOrder)); return {source:"supabase",data:(data as Record<string,unknown>[]).map((c)=>({id:String(c.id),name:String(c.name),nameTj:c.name_tj as string|undefined,slug:String(c.slug),imageUrl:c.image_url as string|undefined,isActive:Boolean(c.is_active),sortOrder:Number(c.sort_order)}))}; }
-export async function getCategoryBySlug(slug:string) { const categories=await getActiveCategories(); return categories.data?.find((c)=>c.slug===slug) ?? null; }
-export async function getActiveProducts(filters?:ProductFilters): Promise<MenuDataState<Product[]>> { const rows=await fromSupabase(); return rows ? {source:"supabase",data:filterProducts(rows,filters)} : demo(filterProducts(fixtureProducts,filters)); }
-export async function getProductsByCategory(categorySlug:string, filters?:ProductFilters) { const category=await getCategoryBySlug(categorySlug); if(!category)return null; const products=await getActiveProducts({...filters,category:category.id}); return {category,products}; }
-export async function getProductBySlug(slug:string) { const products=await getActiveProducts(); const product=products.data?.find((p)=>p.slug===slug) ?? null; return product ? {...product,variants:activeVariants(product),comboComponents:sortedComboComponents(product)} : null; }
-export async function getPopularProducts() { const products=await getActiveProducts({sort:"popular"}); return products.data?.filter((p)=>p.isPopular) ?? null; }
-export async function getActiveCombos() { const products=await getActiveProducts(); return products.data?.filter((p)=>p.productType==="COMBO") ?? null; }
-export async function searchProducts(query:string, filters?:ProductFilters) { const rows=await fromSupabase(); const all=rows ?? (demoAllowed ? fixtureProducts : null); if(!all)return {source:"unavailable" as const,data:null}; return {source:rows?"supabase" as const:"development-fixture" as const,data:filterProducts(searchMatches(all,query),filters)}; }
-export async function getPublicRestaurantSettings(): Promise<MenuDataState<PublicRestaurantSettings>> { const fallback={restaurantName:"DIYOR BURGER",mainAddress:"ноҳияи Кушониён",pickupEnabled:true,workOpenTime:"08:00",workCloseTime:"00:00"}; const client=await createSupabaseServerClient(); if(!client)return demo(fallback); const {data,error}=await client.from("public_restaurant_settings").select("*").maybeSingle(); if(error||!data)return demo(fallback); const row=data as Record<string,unknown>; return {source:"supabase",data:{restaurantName:String(row.restaurant_name),contactPhone1:row.contact_phone_1 as string|undefined,contactPhone2:row.contact_phone_2 as string|undefined,instagramUrl:row.instagram_url as string|undefined,mainAddress:String(row.main_address??""),pickupEnabled:Boolean(row.pickup_enabled),pickupAddress:row.pickup_address as string|undefined,pickupNote:row.pickup_note as string|undefined,mapUrl:row.map_url as string|undefined,workOpenTime:row.work_open_time as string|undefined,workCloseTime:row.work_close_time as string|undefined,heroTitle:row.hero_title as string|undefined,heroSubtitle:row.hero_subtitle as string|undefined,heroImageUrl:row.hero_image_url as string|undefined,benefitLabels:Array.isArray(row.benefit_labels)?row.benefit_labels.map(String):undefined,promotionText:row.promotion_text as string|undefined,promotionImageUrl:row.promotion_image_url as string|undefined,cartEmptyTitle:row.cart_empty_title as string|undefined,cartEmptyBody:row.cart_empty_body as string|undefined,cartCheckoutLabel:row.cart_checkout_label as string|undefined,cartWhatsappLabel:row.cart_whatsapp_label as string|undefined}}; }
-export async function getCheckoutRestaurantSettings() { const fallback={name:"DIYOR BURGER",whatsapp:"992007884423",pickupEnabled:true}; const client=await createSupabaseServerClient(); if(!client)return demo(fallback); const {data,error}=await client.from("restaurant_settings").select("restaurant_name,order_whatsapp_number,pickup_enabled,pickup_address").maybeSingle(); if(error||!data)return demo(fallback); const row=data as Record<string,unknown>; return {source:"supabase" as const,data:{name:String(row.restaurant_name),whatsapp:String(row.order_whatsapp_number??""),pickupEnabled:Boolean(row.pickup_enabled),pickupAddress:row.pickup_address as string|undefined}}; }
+function demo<T>(data: T): MenuDataState<T> {
+  return demoAllowed
+    ? { source: "development-fixture", data }
+    : { source: "unavailable", data: null };
+}
+function mapProduct(row: Record<string, unknown>): Product {
+  const variants = Array.isArray(row.product_variants)
+    ? (row.product_variants as Record<string, unknown>[])
+    : [];
+  const components = Array.isArray(row.combo_components)
+    ? (row.combo_components as Record<string, unknown>[])
+    : [];
+  return {
+    id: String(row.id),
+    categoryId: String(row.category_id),
+    name: String(row.name),
+    nameTj: row.name_tj as string | undefined,
+    slug: String(row.slug),
+    productType: row.product_type as Product["productType"],
+    description: String(row.description ?? ""),
+    descriptionTj: row.description_tj as string | undefined,
+    ingredientsText: String(row.ingredients_text ?? ""),
+    ingredientsTextTj: row.ingredients_text_tj as string | undefined,
+    imageUrl: row.image_url as string | undefined,
+    basePriceDiram: row.base_price_diram as number | undefined,
+    oldPriceDiram: row.old_price_diram as number | undefined,
+    promotionLabel: row.promotion_label as string | undefined,
+    isAvailable: Boolean(row.is_available),
+    isActive: Boolean(row.is_active),
+    isPopular: Boolean(row.is_popular),
+    sortOrder: Number(row.sort_order),
+    variants: variants.map((x) => ({
+      id: String(x.id),
+      name: String(x.name),
+      nameTj: x.name_tj as string | undefined,
+      priceDiram: Number(x.price_diram),
+      oldPriceDiram: x.old_price_diram as number | undefined,
+      isActive: Boolean(x.is_active),
+      isAvailable:
+        x.is_available === undefined ? true : Boolean(x.is_available),
+      sortOrder: Number(x.sort_order),
+    })),
+    comboComponents: components
+      .filter((x) => !x.archived_at)
+      .map((x) => ({
+        id: String(x.id),
+        name: String(x.name),
+        nameTj: x.name_tj as string | undefined,
+        description: x.description as string | undefined,
+        descriptionTj: x.description_tj as string | undefined,
+        quantity: Number(x.quantity),
+        sortOrder: Number(x.sort_order),
+      })),
+  };
+}
+async function fromSupabase(): Promise<Product[] | null> {
+  const client = await createSupabaseServerClient();
+  if (!client) return null;
+  const { data, error } = await client
+    .from("products")
+    .select(
+      "*, product_variants(*), combo_components!combo_components_product_id_fkey(*)",
+    )
+    .eq("is_active", true)
+    .is("archived_at", null);
+  if (error) return null;
+  return (data as Record<string, unknown>[]).map(mapProduct);
+}
+export async function getActiveCategories(): Promise<
+  MenuDataState<Category[]>
+> {
+  const client = await createSupabaseServerClient();
+  if (!client)
+    return demo(
+      fixtureCategories
+        .filter((c) => c.isActive)
+        .sort((a, b) => a.sortOrder - b.sortOrder),
+    );
+  const { data, error } = await client
+    .from("categories")
+    .select("*")
+    .eq("is_active", true)
+    .is("archived_at", null)
+    .order("sort_order");
+  if (error)
+    return demo(
+      fixtureCategories
+        .filter((c) => c.isActive)
+        .sort((a, b) => a.sortOrder - b.sortOrder),
+    );
+  return {
+    source: "supabase",
+    data: (data as Record<string, unknown>[]).map((c) => ({
+      id: String(c.id),
+      name: String(c.name),
+      nameTj: c.name_tj as string | undefined,
+      slug: String(c.slug),
+      imageUrl: c.image_url as string | undefined,
+      isActive: Boolean(c.is_active),
+      sortOrder: Number(c.sort_order),
+    })),
+  };
+}
+export async function getCategoryBySlug(slug: string) {
+  const categories = await getActiveCategories();
+  return categories.data?.find((c) => c.slug === slug) ?? null;
+}
+export async function getActiveProducts(
+  filters?: ProductFilters,
+): Promise<MenuDataState<Product[]>> {
+  const rows = await fromSupabase();
+  return rows
+    ? { source: "supabase", data: filterProducts(rows, filters) }
+    : demo(filterProducts(fixtureProducts, filters));
+}
+export async function getProductsByCategory(
+  categorySlug: string,
+  filters?: ProductFilters,
+) {
+  const category = await getCategoryBySlug(categorySlug);
+  if (!category) return null;
+  const products = await getActiveProducts({
+    ...filters,
+    category: category.id,
+  });
+  return { category, products };
+}
+export async function getProductBySlug(slug: string) {
+  const products = await getActiveProducts();
+  const product = products.data?.find((p) => p.slug === slug) ?? null;
+  return product
+    ? {
+        ...product,
+        variants: activeVariants(product),
+        comboComponents: sortedComboComponents(product),
+      }
+    : null;
+}
+export async function getPopularProducts() {
+  const products = await getActiveProducts({ sort: "popular" });
+  return products.data?.filter((p) => p.isPopular) ?? null;
+}
+export async function getActiveCombos() {
+  const products = await getActiveProducts();
+  return products.data?.filter((p) => p.productType === "COMBO") ?? null;
+}
+export async function getActiveBanners(): Promise<
+  MenuDataState<PublicBanner[]>
+> {
+  const client = await createSupabaseServerClient();
+  if (!client) return demo([]);
+  const { data, error } = await client
+    .from("banners")
+    .select("id,title,body,image_url,target_url")
+    .eq("is_active", true)
+    .is("archived_at", null)
+    .order("sort_order");
+  if (error) return demo([]);
+  return {
+    source: "supabase",
+    data: (data as Record<string, unknown>[]).map((banner) => ({
+      id: String(banner.id),
+      title: String(banner.title),
+      body: banner.body as string | undefined,
+      imageUrl: banner.image_url as string | undefined,
+      targetUrl: banner.target_url as string | undefined,
+    })),
+  };
+}
+export async function searchProducts(query: string, filters?: ProductFilters) {
+  const rows = await fromSupabase();
+  const all = rows ?? (demoAllowed ? fixtureProducts : null);
+  if (!all) return { source: "unavailable" as const, data: null };
+  return {
+    source: rows ? ("supabase" as const) : ("development-fixture" as const),
+    data: filterProducts(searchMatches(all, query), filters),
+  };
+}
+export async function getPublicRestaurantSettings(): Promise<
+  MenuDataState<PublicRestaurantSettings>
+> {
+  const fallback = {
+    restaurantName: "DIYOR BURGER",
+    mainAddress: "ноҳияи Кушониён",
+    pickupEnabled: true,
+    workOpenTime: "08:00",
+    workCloseTime: "00:00",
+  };
+  const client = await createSupabaseServerClient();
+  if (!client) return demo(fallback);
+  const { data, error } = await client
+    .from("public_restaurant_settings")
+    .select("*")
+    .maybeSingle();
+  if (error || !data) return demo(fallback);
+  const row = data as Record<string, unknown>;
+  return {
+    source: "supabase",
+    data: {
+      restaurantName: String(row.restaurant_name),
+      contactPhone1: row.contact_phone_1 as string | undefined,
+      contactPhone2: row.contact_phone_2 as string | undefined,
+      instagramUrl: row.instagram_url as string | undefined,
+      mainAddress: String(row.main_address ?? ""),
+      pickupEnabled: Boolean(row.pickup_enabled),
+      pickupAddress: row.pickup_address as string | undefined,
+      pickupNote: row.pickup_note as string | undefined,
+      mapUrl: row.map_url as string | undefined,
+      workOpenTime: row.work_open_time as string | undefined,
+      workCloseTime: row.work_close_time as string | undefined,
+      heroTitle: row.hero_title as string | undefined,
+      heroSubtitle: row.hero_subtitle as string | undefined,
+      heroImageUrl: row.hero_image_url as string | undefined,
+      benefitLabels: Array.isArray(row.benefit_labels)
+        ? row.benefit_labels.map(String)
+        : undefined,
+      promotionText: row.promotion_text as string | undefined,
+      promotionImageUrl: row.promotion_image_url as string | undefined,
+      cartEmptyTitle: row.cart_empty_title as string | undefined,
+      cartEmptyBody: row.cart_empty_body as string | undefined,
+      cartCheckoutLabel: row.cart_checkout_label as string | undefined,
+      cartWhatsappLabel: row.cart_whatsapp_label as string | undefined,
+    },
+  };
+}
+export async function getCheckoutRestaurantSettings() {
+  const fallback = {
+    name: "DIYOR BURGER",
+    whatsapp: "992007884423",
+    pickupEnabled: true,
+  };
+  const client = await createSupabaseServerClient();
+  if (!client) return demo(fallback);
+  const { data, error } = await client
+    .from("restaurant_settings")
+    .select(
+      "restaurant_name,order_whatsapp_number,pickup_enabled,pickup_address",
+    )
+    .maybeSingle();
+  if (error || !data) return demo(fallback);
+  const row = data as Record<string, unknown>;
+  return {
+    source: "supabase" as const,
+    data: {
+      name: String(row.restaurant_name),
+      whatsapp: String(row.order_whatsapp_number ?? ""),
+      pickupEnabled: Boolean(row.pickup_enabled),
+      pickupAddress: row.pickup_address as string | undefined,
+    },
+  };
+}
 const fixtureDeliveryZones: PublicDeliveryZone[] = [
-  { id: "kushoniyon", name: "Кушониён", isActive: true, deliveryFeeDiram: 1000, freeDeliveryThresholdDiram: 15000 },
-  { id: "vakhsh", name: "Вахш", isActive: true, deliveryFeeDiram: 2000, freeDeliveryThresholdDiram: 25000 },
-  { id: "bokhtar", name: "Бохтар", isActive: true, deliveryFeeDiram: 2000, freeDeliveryThresholdDiram: 25000 },
+  {
+    id: "kushoniyon",
+    name: "Кушониён",
+    isActive: true,
+    deliveryFeeDiram: 1000,
+    freeDeliveryThresholdDiram: 15000,
+  },
+  {
+    id: "vakhsh",
+    name: "Вахш",
+    isActive: true,
+    deliveryFeeDiram: 2000,
+    freeDeliveryThresholdDiram: 25000,
+  },
+  {
+    id: "bokhtar",
+    name: "Бохтар",
+    isActive: true,
+    deliveryFeeDiram: 2000,
+    freeDeliveryThresholdDiram: 25000,
+  },
 ];
-export async function getActiveDeliveryZones(): Promise<MenuDataState<PublicDeliveryZone[]>> { const client=await createSupabaseServerClient(); if(!client)return demo(fixtureDeliveryZones); const {data,error}=await client.from("delivery_zones").select("id,name,is_active,delivery_fee_diram,free_delivery_threshold_diram").eq("is_active",true).is("archived_at",null).order("sort_order"); if(error)return demo(fixtureDeliveryZones); return {source:"supabase",data:(data as Record<string,unknown>[]).map((zone)=>({id:String(zone.id),name:String(zone.name),isActive:Boolean(zone.is_active),deliveryFeeDiram:Number(zone.delivery_fee_diram),freeDeliveryThresholdDiram:Number(zone.free_delivery_threshold_diram) }))}; }
+export async function getActiveDeliveryZones(): Promise<
+  MenuDataState<PublicDeliveryZone[]>
+> {
+  const client = await createSupabaseServerClient();
+  if (!client) return demo(fixtureDeliveryZones);
+  const { data, error } = await client
+    .from("delivery_zones")
+    .select(
+      "id,name,is_active,delivery_fee_diram,free_delivery_threshold_diram",
+    )
+    .eq("is_active", true)
+    .is("archived_at", null)
+    .order("sort_order");
+  if (error) return demo(fixtureDeliveryZones);
+  return {
+    source: "supabase",
+    data: (data as Record<string, unknown>[]).map((zone) => ({
+      id: String(zone.id),
+      name: String(zone.name),
+      isActive: Boolean(zone.is_active),
+      deliveryFeeDiram: Number(zone.delivery_fee_diram),
+      freeDeliveryThresholdDiram: Number(zone.free_delivery_threshold_diram),
+    })),
+  };
+}
