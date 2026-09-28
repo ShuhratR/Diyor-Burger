@@ -92,7 +92,8 @@ test("the same preview works from a category, search results, and favorites", as
   await expectViewportOverlay(page);
   await page.keyboard.press("Escape");
   await page.goto("/menu");
-  await page.getByRole("button", { name: "Добавить в избранное" }).first().click();
+  const burgerCard = page.getByRole("button", { name: "Открыть Гамбургер", exact: true }).locator("..");
+  await burgerCard.getByRole("button", { name: "Добавить в избранное" }).click();
   dialog = await openPreview(page, "/favorites", "Гамбургер");
   await expectViewportOverlay(page);
 });
@@ -107,3 +108,17 @@ test("backdrop tap closes the modal and restores the opener focus", async ({ pag
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(opener).toBeFocused();
 });
+
+for (const [name, route] of [
+  ["Хот-дог", "/menu/hotdogs"],
+  ["Ролл Буррито", "/menu/rolls"],
+  ["Картофель фри", "/menu/sides"],
+  ["Coca-Cola 0.4", "/menu/drinks"],
+] as const) {
+  test(name + " uses the same full-screen preview", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const dialog = await openPreview(page, route, name);
+    await expectViewportOverlay(page);
+    await expect(dialog.getByRole("button", { name: /Добавить в корзину/ })).toBeVisible();
+  });
+}
