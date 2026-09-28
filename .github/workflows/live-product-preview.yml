@@ -1,0 +1,37 @@
+name: Live product preview QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "tests/live/product-preview-live.spec.ts"
+      - "playwright.live-preview.config.ts"
+      - ".github/workflows/live-product-preview.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  live-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Read-only client preview test on the published production domain
+        run: npx playwright test --config playwright.live-preview.config.ts
+      - name: Attach failure traces and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-product-preview
+          path: |
+            artifacts/live-preview-report/
+            artifacts/live-preview-results/
+          retention-days: 7
+          if-no-files-found: warn
