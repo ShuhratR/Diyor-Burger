@@ -43,8 +43,8 @@ for (const viewport of viewports) {
       const dialog = await openPreview(page, "/combos", "Комбо Чизбургер");
       await expectViewportOverlay(page);
       await expect(dialog.getByRole("heading", { name: "Что входит в комбо" })).toBeVisible();
-      await expect(dialog.getByText("Картофель фри")).toBeVisible();
-      await expect(dialog.getByText("Напиток 0.4")).toBeVisible();
+      await expect(dialog.getByText("Картофель фри", { exact: true })).toBeVisible();
+      await expect(dialog.getByText("Напиток 0.4", { exact: true })).toBeVisible();
       const content = dialog.locator(".quick-view-content");
       await content.evaluate(element => { element.scrollTop = element.scrollHeight; });
       await expect(dialog.getByRole("button", { name: /Добавить в корзину/ })).toBeVisible();
@@ -92,9 +92,19 @@ test("the same preview works from a category, search results, and favorites", as
   await expectViewportOverlay(page);
   await page.keyboard.press("Escape");
   await page.goto("/menu");
-  const burgerCard = page.getByRole("button", { name: "Открыть Гамбургер", exact: true }).locator("..");
-  await burgerCard.getByRole("button", { name: "Добавить в избранное" }).click();
-  dialog = await openPreview(page, "/favorites", "Гамбургер");
+  const burgerCard = page.locator("article.product-card").filter({
+    has: page.getByRole("button", { name: "Открыть Гамбургер", exact: true }),
+  }).first();
+  const favorite = burgerCard.locator(".card-actions button").first();
+  await expect(favorite).toBeVisible();
+  await favorite.click();
+  await expect(favorite).toHaveAttribute("aria-label", "Удалить из избранного");
+  await page.goto("/favorites", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("button", { name: "Открыть Гамбургер", exact: true })).toBeVisible();
+  const favoriteOpener = page.getByRole("button", { name: "Открыть Гамбургер", exact: true });
+  await favoriteOpener.click();
+  dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("heading", { name: "Гамбургер", exact: true })).toBeVisible();
   await expectViewportOverlay(page);
 });
 
