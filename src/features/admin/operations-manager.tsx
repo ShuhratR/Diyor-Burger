@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useAdminSave } from "./admin-submit";
 import {
   archiveBanner,
   archiveZone,
@@ -103,11 +105,10 @@ function Sheet({
 
 function ZoneForm({ zone, close }: { zone?: Zone; close: () => void }) {
   const z = zone;
+  const router = useRouter();
+  const { submit, pending, error } = useAdminSave({action: saveZone, onSuccess: () => {close(); router.refresh();}, successTitle: z ? "Зона обновлена" : "Зона доставки добавлена", errorTitle: "Не удалось сохранить зону"});
   return (
-    <form
-      action={saveZone}
-      className="admin-form admin-editor"
-    >
+    <form action={submit} aria-busy={pending} className="admin-form admin-editor">
       {z && <input type="hidden" name="id" value={z.id} />}
       <div className="admin-form-grid">
         <label>
@@ -163,8 +164,9 @@ function ZoneForm({ zone, close }: { zone?: Zone; close: () => void }) {
         />{" "}
         Показывать клиентам
       </label>
-      <button className="admin-save">
-        ✓ {z ? "Сохранить изменения" : "Добавить зону"}
+      {error && <p className="admin-form-error" role="alert">{error}</p>}
+      <button className="admin-save" disabled={pending}>
+        {pending ? "Сохранение…" : `✓ ${z ? "Сохранить изменения" : "Добавить зону"}`}
       </button>
     </form>
   );
@@ -242,11 +244,10 @@ export function DeliveryManager({ zones }: { zones: Zone[] }) {
 
 function BannerForm({ banner, close }: { banner?: Banner; close: () => void }) {
   const b = banner;
+  const router = useRouter();
+  const { submit, pending, error } = useAdminSave({action: saveBanner, onSuccess: () => {close(); router.refresh();}, successTitle: b ? "Баннер обновлён" : "Баннер опубликован", errorTitle: "Не удалось сохранить баннер"});
   return (
-    <form
-      action={saveBanner}
-      className="admin-form admin-editor"
-    >
+    <form action={submit} aria-busy={pending} className="admin-form admin-editor">
       {b && <input type="hidden" name="id" value={b.id} />}
       <div className="admin-form-grid">
         <label>
@@ -292,8 +293,9 @@ function BannerForm({ banner, close }: { banner?: Banner; close: () => void }) {
         />{" "}
         Показывать клиентам
       </label>
-      <button className="admin-save">
-        ✓ {b ? "Сохранить изменения" : "Добавить баннер"}
+      {error && <p className="admin-form-error" role="alert">{error}</p>}
+      <button className="admin-save" disabled={pending}>
+        {pending ? "Сохранение…" : `✓ ${b ? "Сохранить изменения" : "Добавить баннер"}`}
       </button>
     </form>
   );
@@ -382,11 +384,10 @@ export function SettingsForm({
   close: () => void;
 }) {
   const labels = settings.benefitLabels ?? [];
+  const router = useRouter();
+  const { submit, pending, error } = useAdminSave({action: saveSettings, onSuccess: () => {close(); router.refresh();}, successTitle: "Настройки сохранены", errorTitle: "Не удалось сохранить настройки"});
   return (
-    <form
-      action={saveSettings}
-      className="admin-form admin-editor"
-    >
+    <form action={submit} aria-busy={pending} className="admin-form admin-editor">
       <div className="admin-form-grid">
         <label>
           Название
@@ -597,7 +598,8 @@ export function SettingsForm({
           />
         </label>
       </details>
-      <button className="admin-save">✓ Сохранить и опубликовать</button>
+      {error && <p className="admin-form-error" role="alert">{error}</p>}
+      <button className="admin-save" disabled={pending}>{pending ? "Сохранение…" : "✓ Сохранить и опубликовать"}</button>
     </form>
   );
 }
