@@ -10,6 +10,7 @@ import {
 } from "./product-actions";
 import { archiveVariant, saveVariant } from "./variant-actions";
 import { AdminImageInput } from "./admin-image-input";
+import { InlineCategoryDialog } from "./inline-category-dialog";
 import { useFeedback } from "@/features/feedback/feedback-provider";
 import { useAdminSave } from "./admin-submit";
 import type { AdminCategoryOption, AdminProduct } from "./product-manager";
@@ -153,19 +154,22 @@ function Editor({
   const [type, setType] = useState<AdminProduct["productType"]>(
     product?.productType ?? "NORMAL",
   );
+  const [categoryOptions, setCategoryOptions] = useState(categories);
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const suggested = (kind: AdminProduct["productType"]) =>
-    categories.find((item) =>
+    categoryOptions.find((item) =>
       kind === "PIZZA"
         ? /пицц/i.test(item.name)
         : kind === "COMBO"
           ? /комбо/i.test(item.name)
           : !/пицц|комбо/i.test(item.name),
-    )?.id ?? categories[0]?.id;
+    )?.id ?? categoryOptions[0]?.id;
   const [category, setCategory] = useState(
     product?.categoryId ?? suggested(type),
   );
   const pizza = type === "PIZZA";
   return (
+    <>
     <form action={onSaved} aria-busy={pending} className="admin-form admin-editor">
       {product && <input type="hidden" name="id" value={product.id} />}
       <div className="admin-form-grid">
@@ -189,20 +193,28 @@ function Editor({
             <option value="COMBO">Комбо</option>
           </select>
         </label>
-        <label>
-          Категория
+        <div className="admin-inline-category">
+          <label htmlFor="product-category">Категория</label>
           <select
+            id="product-category"
             name="categoryId"
-            value={category}
+            value={category ?? ""}
+            required
             onChange={(event) => setCategory(event.target.value)}
           >
-            {categories.map((item) => (
+            {categoryOptions.length === 0 && <option value="">Сначала создайте раздел</option>}
+            {categoryOptions.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
               </option>
             ))}
           </select>
-        </label>
+          <button type="button" className="admin-inline-category-add"
+            onClick={() => setShowCategoryDialog(true)}>
+            ＋ Новая категория с фотографией
+          </button>
+          <small>Например, «Ножки» — создайте раздел здесь, затем продолжите заполнять товар.</small>
+        </div>
         <label>
           Цена, сомони
           <input
@@ -310,6 +322,19 @@ function Editor({
         {pending ? "Сохранение…" : `✓ ${product ? "Сохранить изменения" : "Добавить товар"}`}
       </button>
     </form>
+    {showCategoryDialog && (
+      <InlineCategoryDialog
+        categories={categoryOptions}
+        onClose={() => setShowCategoryDialog(false)}
+        onCreated={created => {
+          setCategoryOptions(items => items.some(item => item.id === created.id)
+            ? items : [...items, created]);
+          setCategory(created.id);
+          setShowCategoryDialog(false);
+        }}
+      />
+    )}
+    </>
   );
 }
 
