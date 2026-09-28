@@ -30,6 +30,8 @@ export function HomeComboCarousel({
         window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const rail = railRef.current?.querySelector<HTMLElement>(".product-grid");
       if (!rail || rail.scrollWidth - rail.clientWidth < 8) return;
+      const bounds = rail.getBoundingClientRect();
+      if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) return;
       const cards = rail.querySelectorAll<HTMLElement>(".product-card");
       const stride = cards.length > 1
         ? cards[1].offsetLeft - cards[0].offsetLeft
@@ -77,7 +79,12 @@ export function HomeComboCarousel({
           className="home-combo-autoplay"
           aria-pressed={paused}
           aria-label={paused ? "Включить автоматическую прокрутку комбо" : "Остановить автоматическую прокрутку комбо"}
-          onClick={() => { delayAutoPlay(); setPaused(value => !value); }}
+          onClick={event => {
+            const nextPaused = !paused;
+            setPaused(nextPaused);
+            event.currentTarget.blur();
+            resumeAt.current = nextPaused ? Date.now() + RESUME_AFTER_INTERACTION_MS : 0;
+          }}
         >{paused ? "▶ Автопрокрутка" : "Ⅱ Пауза"}</button>
       )}
     </div>
