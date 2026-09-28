@@ -17,7 +17,6 @@ export async function restoreArchived(form: FormData) {
   [
     "/admin/archive",
     "/admin/products",
-    "/admin/products/[id]",
     "/admin/combos",
     "/admin/categories",
     "/admin/delivery",
