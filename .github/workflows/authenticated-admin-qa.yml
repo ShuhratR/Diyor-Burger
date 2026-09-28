@@ -1,0 +1,35 @@
+name: Authenticated Admin QA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  admin-read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Keep this pinned to the owner's confirmed domain. Never accept an
+      # arbitrary workflow input for a run that receives login credentials.
+      QA_BASE_URL: https://diyor-nine.vercel.app
+      QA_ADMIN_EMAIL: ${{ secrets.QA_ADMIN_EMAIL }}
+      QA_ADMIN_PASSWORD: ${{ secrets.QA_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify secure test credentials are configured
+        shell: bash
+        run: |
+          if [ -z "$QA_ADMIN_EMAIL" ] || [ -z "$QA_ADMIN_PASSWORD" ]; then
+            echo "::error::Configure QA_ADMIN_EMAIL and QA_ADMIN_PASSWORD in repository Actions secrets before running."
+            exit 1
+          fi
+      - name: Check admin login and all admin sections (read-only)
+        run: npx playwright test --config playwright.admin.config.ts
