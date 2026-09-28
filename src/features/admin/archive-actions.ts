@@ -4,7 +4,7 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-const types = ["products", "categories", "delivery_zones", "banners"] as const;
+const types = ["products", "product_variants", "categories", "delivery_zones", "banners"] as const;
 export async function restoreArchived(form: FormData) {
   const table = z.enum(types).parse(form.get("table"));
   const id = z.string().uuid().parse(form.get("id"));
@@ -17,6 +17,7 @@ export async function restoreArchived(form: FormData) {
   [
     "/admin/archive",
     "/admin/products",
+    "/admin/products/[id]",
     "/admin/combos",
     "/admin/categories",
     "/admin/delivery",
