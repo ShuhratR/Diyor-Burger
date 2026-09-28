@@ -1,13 +1,112 @@
 "use server";
+
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/admin";
 import { writeAdminAudit } from "@/lib/admin/audit-log";
 import { somoniToDiram, parseOptionalOldPriceDiram } from "@/lib/money";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-const comboSchema=z.object({id:z.string().uuid().optional(),categoryId:z.string().uuid(),name:z.string().trim().min(1).max(120),nameTj:z.string().trim().max(120),slug:z.string().trim().toLowerCase().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(120),description:z.string().trim().max(1000),descriptionTj:z.string().trim().max(1000),price:z.string(),oldPrice:z.string(),imageUrl:z.string().trim().url().max(2048).optional().or(z.literal("")),sortOrder:z.coerce.number().int().min(0).max(9999),isAvailable:z.boolean(),isActive:z.boolean(),isPopular:z.boolean()});
-async function client(){await requireAdmin();const c=await createSupabaseServerClient();if(!c)throw new Error("ADMIN_DATA_UNAVAILABLE");return c}function refresh(){["/admin/combos","/combos","/","/menu"].forEach((path)=>revalidatePath(path))}function values(f:FormData){return{id:String(f.get("id")??"")||undefined,categoryId:String(f.get("categoryId")??""),name:String(f.get("name")??""),nameTj:String(f.get("nameTj")??""),slug:String(f.get("slug")||`combo-${crypto.randomUUID()}`),description:String(f.get("description")??""),descriptionTj:String(f.get("descriptionTj")??""),price:String(f.get("price")??""),oldPrice:String(f.get("oldPrice")??""),imageUrl:String(f.get("imageUrl")??""),sortOrder:f.get("sortOrder")??0,isAvailable:f.get("isAvailable")==="on",isActive:f.get("isActive")==="on",isPopular:f.get("isPopular")==="on"}}
-export async function saveCombo(f:FormData){const d=comboSchema.parse(values(f));const price=somoniToDiram(d.price);if(price===null)throw new Error("INVALID_PRICE");const oldPrice=parseOptionalOldPriceDiram(d.oldPrice,price);const c=await client();const p={category_id:d.categoryId,name:d.name,name_tj:d.nameTj||d.name,slug:d.slug,description:d.description,description_tj:d.descriptionTj||d.description,product_type:"COMBO" as const,base_price_diram:price,old_price_diram:oldPrice,image_url:d.imageUrl||null,sort_order:d.sortOrder,is_available:d.isAvailable,is_active:d.isActive,is_popular:d.isPopular};const r=d.id?await c.from("products").update(p).eq("id",d.id):await c.from("products").insert(p);if(r.error)throw new Error("COMBO_SAVE_FAILED");await writeAdminAudit(c,{action:d.id?"update":"create",entityType:"combo",entityId:d.id,afterData:{slug:d.slug,oldPrice,isActive:d.isActive,isAvailable:d.isAvailable}});refresh()}
-export async function addComboComponent(f:FormData){const comboId=z.string().uuid().parse(f.get("comboId"));const componentId=z.string().uuid().parse(f.get("componentProductId"));const quantity=z.coerce.number().int().min(1).max(99).parse(f.get("quantity"));const sortOrder=z.coerce.number().int().min(0).max(9999).parse(f.get("sortOrder"));const c=await client();const{data,error}=await c.from("products").select("id,name,name_tj,description,description_tj").eq("id",componentId).is("archived_at",null).maybeSingle();if(error||!data)throw new Error("COMPONENT_PRODUCT_NOT_FOUND");const p=data as Record<string,unknown>;const r=await c.from("combo_components").insert({product_id:comboId,component_product_id:componentId,name:String(p.name),name_tj:p.name_tj as string|null,description:p.description as string|null,description_tj:p.description_tj as string|null,quantity,sort_order:sortOrder});if(r.error)throw new Error("COMPONENT_SAVE_FAILED");await writeAdminAudit(c,{action:"create",entityType:"combo_component",afterData:{comboId,componentId,quantity}});refresh()}
-export async function archiveCombo(f:FormData){const id=z.string().uuid().parse(f.get("id"));const c=await client();const{error}=await c.from("products").update({archived_at:new Date().toISOString(),is_active:false}).eq("id",id).eq("product_type","COMBO");if(error)throw new Error("COMBO_ARCHIVE_FAILED");await writeAdminAudit(c,{action:"archive",entityType:"combo",entityId:id});refresh()}
-export async function archiveComboComponent(f:FormData){const id=z.string().uuid().parse(f.get("id"));const c=await client();const{error}=await c.from("combo_components").update({archived_at:new Date().toISOString()}).eq("id",id);if(error)throw new Error("COMPONENT_ARCHIVE_FAILED");await writeAdminAudit(c,{action:"archive",entityType:"combo_component",entityId:id});refresh()}
+
+const itemSchema = z.object({
+  productId: z.string().uuid().nullable(),
+  name: z.string().trim().min(1).max(120),
+  quantity: z.number().int().min(1).max(99),
+});
+const comboSchema = z.object({
+  id: z.string().uuid().optional(),
+  categoryId: z.string().uuid(),
+  name: z.string().trim().min(1).max(120),
+  nameTj: z.string().trim().max(120),
+  slug: z.string().trim().toLowerCase()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(120),
+  description: z.string().trim().max(1000),
+  descriptionTj: z.string().trim().max(1000),
+  price: z.string(),
+  oldPrice: z.string(),
+  imageUrl: z.string().trim().url().max(2048).optional().or(z.literal("")),
+  sortOrder: z.coerce.number().int().min(0).max(9999),
+  isAvailable: z.boolean(),
+  isActive: z.boolean(),
+  isPopular: z.boolean(),
+  components: z.array(itemSchema).min(1).max(30),
+});
+
+async function client() {
+  await requireAdmin();
+  const c = await createSupabaseServerClient();
+  if (!c) throw new Error("ADMIN_DATA_UNAVAILABLE");
+  return c;
+}
+function refresh() {
+  ["/admin/combos", "/admin/products", "/combos", "/", "/menu", "/search"]
+    .forEach(path => revalidatePath(path));
+}
+function values(form: FormData) {
+  let components: unknown;
+  try {
+    components = JSON.parse(String(form.get("components") ?? "[]"));
+  } catch {
+    throw new Error("INVALID_COMBO_COMPONENTS");
+  }
+  return {
+    id: String(form.get("id") ?? "") || undefined,
+    categoryId: String(form.get("categoryId") ?? ""),
+    name: String(form.get("name") ?? ""),
+    nameTj: String(form.get("nameTj") ?? ""),
+    slug: String(form.get("slug") || `combo-${crypto.randomUUID()}`),
+    description: String(form.get("description") ?? ""),
+    descriptionTj: String(form.get("descriptionTj") ?? ""),
+    price: String(form.get("price") ?? ""),
+    oldPrice: String(form.get("oldPrice") ?? ""),
+    imageUrl: String(form.get("imageUrl") ?? ""),
+    sortOrder: form.get("sortOrder") ?? 0,
+    isAvailable: form.get("isAvailable") === "on",
+    isActive: form.get("isActive") === "on",
+    isPopular: form.get("isPopular") === "on",
+    components,
+  };
+}
+
+/** Single database transaction: combo and complete ordered composition either
+ * both save, or neither does. Custom entries are not standalone products. */
+export async function saveCombo(form: FormData) {
+  const d = comboSchema.parse(values(form));
+  const price = somoniToDiram(d.price);
+  if (price === null) throw new Error("INVALID_PRICE");
+  const oldPrice = parseOptionalOldPriceDiram(d.oldPrice, price);
+  const c = await client();
+  const { data, error } = await c.rpc("save_combo_with_components", {
+    p_combo: {
+      id: d.id ?? null,
+      categoryId: d.categoryId,
+      name: d.name,
+      nameTj: d.nameTj,
+      slug: d.slug,
+      description: d.description,
+      descriptionTj: d.descriptionTj,
+      priceDiram: price,
+      oldPriceDiram: oldPrice,
+      imageUrl: d.imageUrl || null,
+      sortOrder: d.sortOrder,
+      isAvailable: d.isAvailable,
+      isActive: d.isActive,
+      isPopular: d.isPopular,
+    },
+    p_components: d.components,
+  });
+  if (error || !data) throw new Error("COMBO_SAVE_FAILED");
+  refresh();
+  return { id: String(data) };
+}
+
+export async function archiveCombo(form: FormData) {
+  const id = z.string().uuid().parse(form.get("id"));
+  const c = await client();
+  const { data, error } = await c.from("products")
+    .update({ archived_at: new Date().toISOString(), is_active: false })
+    .eq("id", id).eq("product_type", "COMBO").is("archived_at", null)
+    .select("id").single();
+  if (error || !data) throw new Error("COMBO_ARCHIVE_FAILED");
+  await writeAdminAudit(c, { action: "archive", entityType: "combo", entityId: id });
+  refresh();
+}
