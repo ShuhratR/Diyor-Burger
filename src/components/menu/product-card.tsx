@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { formatSomoni } from "@/lib/money";
-import { productDisplayPrice } from "@/lib/menu/logic";
+import { productDisplayPrice, productDisplayOldPrice } from "@/lib/menu/logic";
 import type { Product } from "@/lib/menu/types";
 import { useCart } from "@/features/cart/cart-provider";
 import { useFavorites } from "@/features/favorites/favorites-provider";
@@ -14,6 +14,7 @@ import { useFeedback } from "@/features/feedback/feedback-provider";
 
 export function ProductCard({ product }: { product: Product }) {
   const price = productDisplayPrice(product);
+  const oldPrice = productDisplayOldPrice(product);
   const cart = useCart();
   const favorites = useFavorites();
   const [addState, setAddState] = useState<"idle" | "adding" | "added">("idle");
@@ -34,7 +35,7 @@ export function ProductCard({ product }: { product: Product }) {
   function toggleFavorite() { const wasFavorite = favorites.has(product.id); favorites.toggle(product.id); feedback.notify(wasFavorite ? "Удалено из избранного" : "Добавлено в избранное", name); }
 
   return <article className={`product-card ${!product.isAvailable ? "unavailable" : ""}`}>
-    <button className="product-card-open" type="button" onClick={() => setQuickViewOpen(true)} aria-label={`Открыть ${name}`}>{product.promotionLabel && <span className="product-promo">{product.promotionLabel}</span>}<FoodImage src={product.imageUrl} alt={name} compact/><div className="product-card-copy"><h3>{name}</h3><p>{description}</p><strong>{price === undefined ? "—" : `${product.productType === "PIZZA" ? `${t.priceFrom} ` : ""}${formatSomoni(price)}`}</strong>{product.oldPriceDiram && product.oldPriceDiram > (price ?? 0) && <del>{formatSomoni(product.oldPriceDiram)}</del>}{!product.isAvailable && <span className="availability">{t.unavailable}</span>}</div></button>
+    <button className="product-card-open" type="button" onClick={() => setQuickViewOpen(true)} aria-label={`Открыть ${name}`}>{product.promotionLabel && <span className="product-promo">{product.promotionLabel}</span>}<FoodImage src={product.imageUrl} alt={name} compact/><div className="product-card-copy"><h3>{name}</h3><p>{description}</p><strong>{price === undefined ? "—" : `${product.productType === "PIZZA" ? `${t.priceFrom} ` : ""}${formatSomoni(price)}`}</strong>{oldPrice !== undefined && <del>{formatSomoni(oldPrice)}</del>}{!product.isAvailable && <span className="availability">{t.unavailable}</span>}</div></button>
     <div className="card-actions"><button onClick={toggleFavorite} aria-label={favorites.has(product.id) ? "Удалить из избранного" : "Добавить в избранное"}>{favorites.has(product.id) ? "♥" : "♡"}</button>{direct ? <button className="card-add" data-state={addState} disabled={addState !== "idle"} onClick={addToCart} aria-label={`${t.add} ${name}`}>{addState === "adding" ? "…" : addState === "added" ? "✓" : "+"}</button> : <button type="button" onClick={() => setQuickViewOpen(true)} aria-label={`Открыть ${name}`}>+</button>}</div>
     {quickViewOpen && <ProductQuickView product={product} onClose={() => setQuickViewOpen(false)} />}
   </article>;
