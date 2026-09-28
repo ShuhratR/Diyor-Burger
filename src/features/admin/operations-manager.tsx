@@ -1,22 +1,691 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { archiveBanner, archiveZone, saveBanner, saveSettings, saveZone } from "./operations-actions";
+import {
+  archiveBanner,
+  archiveZone,
+  saveBanner,
+  saveSettings,
+  saveZone,
+} from "./operations-actions";
 import { AdminImageInput } from "./admin-image-input";
 import "./admin-manager.css";
 
-export type Zone = { id:string; name:string; nameTj?:string|null; slug:string; fee:number; threshold:number; sortOrder:number; isActive:boolean };
-export type Banner = { id:string; title:string; titleTj?:string|null; body?:string|null; bodyTj?:string|null; imageUrl?:string|null; targetUrl?:string|null; sortOrder:number; isActive:boolean };
-export type Settings = { restaurantName:string; whatsapp:string; phone1?:string|null; phone2?:string|null; instagram?:string|null; mainAddress:string; mainAddressTj?:string|null; pickupEnabled:boolean; pickupAddress?:string|null; pickupAddressTj?:string|null; pickupNote?:string|null; pickupNoteTj?:string|null; mapUrl?:string|null; openTime?:string|null; closeTime?:string|null; heroTitle?:string|null; heroTitleTj?:string|null; heroSubtitle?:string|null; heroSubtitleTj?:string|null; heroImage?:string|null; benefitLabels?:string[]|null; promotionText?:string|null; promotionImage?:string|null; cartEmptyTitle?:string|null; cartEmptyBody?:string|null; cartCheckoutLabel?:string|null; cartWhatsappLabel?:string|null };
+export type Zone = {
+  id: string;
+  name: string;
+  nameTj?: string | null;
+  slug: string;
+  fee: number;
+  threshold: number;
+  sortOrder: number;
+  isActive: boolean;
+};
+export type Banner = {
+  id: string;
+  title: string;
+  titleTj?: string | null;
+  body?: string | null;
+  bodyTj?: string | null;
+  imageUrl?: string | null;
+  targetUrl?: string | null;
+  sortOrder: number;
+  isActive: boolean;
+};
+export type Settings = {
+  restaurantName: string;
+  whatsapp: string;
+  phone1?: string | null;
+  phone2?: string | null;
+  instagram?: string | null;
+  mainAddress: string;
+  mainAddressTj?: string | null;
+  pickupEnabled: boolean;
+  pickupAddress?: string | null;
+  pickupAddressTj?: string | null;
+  pickupNote?: string | null;
+  pickupNoteTj?: string | null;
+  mapUrl?: string | null;
+  openTime?: string | null;
+  closeTime?: string | null;
+  heroTitle?: string | null;
+  heroTitleTj?: string | null;
+  heroSubtitle?: string | null;
+  heroSubtitleTj?: string | null;
+  heroImage?: string | null;
+  benefitLabels?: string[] | null;
+  promotionText?: string | null;
+  promotionImage?: string | null;
+  cartEmptyTitle?: string | null;
+  cartEmptyBody?: string | null;
+  cartCheckoutLabel?: string | null;
+  cartWhatsappLabel?: string | null;
+};
 
-const Pencil = () => <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16.5-.8 4.3 4.3-.8L19 8.5 15.5 5 4 16.5ZM14 6.5l3.5 3.5"/></svg>;
-function Sheet({ title, kicker, close, children }: { title:string; kicker:string; close:()=>void; children:ReactNode }) { return <div className="admin-editor-backdrop" onMouseDown={(event)=>{if(event.target===event.currentTarget)close();}}><section className="admin-editor-sheet" role="dialog" aria-modal="true"><header><div><p>{kicker}</p><h2>{title}</h2></div><button type="button" aria-label="Закрыть" onClick={close}>×</button></header>{children}</section></div>; }
+const Pencil = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="m4 16.5-.8 4.3 4.3-.8L19 8.5 15.5 5 4 16.5ZM14 6.5l3.5 3.5" />
+  </svg>
+);
+function Sheet({
+  title,
+  kicker,
+  close,
+  children,
+}: {
+  title: string;
+  kicker: string;
+  close: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="admin-editor-backdrop"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) close();
+      }}
+    >
+      <section className="admin-editor-sheet" role="dialog" aria-modal="true">
+        <header>
+          <div>
+            <p>{kicker}</p>
+            <h2>{title}</h2>
+          </div>
+          <button type="button" aria-label="Закрыть" onClick={close}>
+            ×
+          </button>
+        </header>
+        {children}
+      </section>
+    </div>
+  );
+}
 
-function ZoneForm({ zone, close }: { zone?:Zone; close:()=>void }) { const z=zone; return <form action={saveZone} className="admin-form admin-editor" onSubmit={close}>{z&&<input type="hidden" name="id" value={z.id}/>}<div className="admin-form-grid"><label>Название зоны<input name="name" required defaultValue={z?.name}/></label><label>Название TJ<input name="nameTj" defaultValue={z?.nameTj??""}/></label><label>Slug<input name="slug" required pattern="[a-z0-9-]+" defaultValue={z?.slug}/></label><label>Доставка, сомони<input name="fee" required inputMode="decimal" defaultValue={z?String(z.fee/100):""}/></label><label>Бесплатно от, сомони<input name="threshold" required inputMode="decimal" defaultValue={z?String(z.threshold/100):""}/></label><label>Порядок<input name="sortOrder" type="number" min="0" defaultValue={z?.sortOrder??0}/></label></div><label className="admin-switches"><input name="isActive" type="checkbox" defaultChecked={z?.isActive??true}/> Показывать клиентам</label><button className="admin-save">✓ {z?"Сохранить изменения":"Добавить зону"}</button></form>; }
-export function DeliveryManager({ zones }: { zones:Zone[] }) { const [current,setCurrent]=useState<Zone|"new"|null>(null); return <section className="admin-workspace"><header className="admin-workspace-head"><div><p>ДОСТАВКА ДЛЯ КЛИЕНТА</p><h2>Зоны доставки</h2><span>Цена и условие бесплатной доставки видны так же, как в оформлении заказа.</span></div><button className="admin-add" type="button" onClick={()=>setCurrent("new")}>＋ Добавить зону</button></header><div className="admin-product-grid">{zones.map((zone)=><article className="admin-product-card" key={zone.id}><div className="admin-product-image admin-operation-icon"><b>🚚</b><button type="button" aria-label={`Изменить ${zone.name}`} onClick={()=>setCurrent(zone)}><Pencil/></button></div><div><span>ЗОНА ДОСТАВКИ</span><em className={zone.isActive?"ok":"off"}>{zone.isActive?"Активна":"Выключена"}</em><h3>{zone.name}</h3><p>{zone.fee/100} сом · бесплатно от {zone.threshold/100} сом</p></div></article>)}</div>{current&&<Sheet title={current==="new"?"Добавить зону":current.name} kicker={current==="new"?"НОВАЯ ЗОНА":"РЕДАКТИРОВАНИЕ"} close={()=>setCurrent(null)}><ZoneForm zone={current==="new"?undefined:current} close={()=>setCurrent(null)}/>{current!=="new"&&<footer><form action={archiveZone}><input type="hidden" name="id" value={current.id}/><button className="danger">Архивировать</button></form></footer>}</Sheet>}</section>; }
+function ZoneForm({ zone, close }: { zone?: Zone; close: () => void }) {
+  const z = zone;
+  return (
+    <form
+      action={saveZone}
+      className="admin-form admin-editor"
+      onSubmit={close}
+    >
+      {z && <input type="hidden" name="id" value={z.id} />}
+      <div className="admin-form-grid">
+        <label>
+          Название зоны
+          <input name="name" required defaultValue={z?.name} />
+        </label>
+        <label>
+          Название TJ
+          <input name="nameTj" defaultValue={z?.nameTj ?? ""} />
+        </label>
+        <label>
+          Slug
+          <input
+            name="slug"
+            required
+            pattern="[a-z0-9-]+"
+            defaultValue={z?.slug}
+          />
+        </label>
+        <label>
+          Доставка, сомони
+          <input
+            name="fee"
+            required
+            inputMode="decimal"
+            defaultValue={z ? String(z.fee / 100) : ""}
+          />
+        </label>
+        <label>
+          Бесплатно от, сомони
+          <input
+            name="threshold"
+            required
+            inputMode="decimal"
+            defaultValue={z ? String(z.threshold / 100) : ""}
+          />
+        </label>
+        <label>
+          Порядок
+          <input
+            name="sortOrder"
+            type="number"
+            min="0"
+            defaultValue={z?.sortOrder ?? 0}
+          />
+        </label>
+      </div>
+      <label className="admin-switches">
+        <input
+          name="isActive"
+          type="checkbox"
+          defaultChecked={z?.isActive ?? true}
+        />{" "}
+        Показывать клиентам
+      </label>
+      <button className="admin-save">
+        ✓ {z ? "Сохранить изменения" : "Добавить зону"}
+      </button>
+    </form>
+  );
+}
+export function DeliveryManager({ zones }: { zones: Zone[] }) {
+  const [current, setCurrent] = useState<Zone | "new" | null>(null);
+  return (
+    <section className="admin-workspace">
+      <header className="admin-workspace-head">
+        <div>
+          <p>ДОСТАВКА ДЛЯ КЛИЕНТА</p>
+          <h2>Зоны доставки</h2>
+          <span>
+            Цена и условие бесплатной доставки видны так же, как в оформлении
+            заказа.
+          </span>
+        </div>
+        <button
+          className="admin-add"
+          type="button"
+          onClick={() => setCurrent("new")}
+        >
+          ＋ Добавить зону
+        </button>
+      </header>
+      <div className="admin-product-grid">
+        {zones.map((zone) => (
+          <article className="admin-product-card" key={zone.id}>
+            <div className="admin-product-image admin-operation-icon">
+              <b>🚚</b>
+              <button
+                type="button"
+                aria-label={`Изменить ${zone.name}`}
+                onClick={() => setCurrent(zone)}
+              >
+                <Pencil />
+              </button>
+            </div>
+            <div>
+              <span>ЗОНА ДОСТАВКИ</span>
+              <em className={zone.isActive ? "ok" : "off"}>
+                {zone.isActive ? "Активна" : "Выключена"}
+              </em>
+              <h3>{zone.name}</h3>
+              <p>
+                {zone.fee / 100} сом · бесплатно от {zone.threshold / 100} сом
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+      {current && (
+        <Sheet
+          title={current === "new" ? "Добавить зону" : current.name}
+          kicker={current === "new" ? "НОВАЯ ЗОНА" : "РЕДАКТИРОВАНИЕ"}
+          close={() => setCurrent(null)}
+        >
+          <ZoneForm
+            zone={current === "new" ? undefined : current}
+            close={() => setCurrent(null)}
+          />
+          {current !== "new" && (
+            <footer>
+              <form action={archiveZone}>
+                <input type="hidden" name="id" value={current.id} />
+                <button className="danger">Архивировать</button>
+              </form>
+            </footer>
+          )}
+        </Sheet>
+      )}
+    </section>
+  );
+}
 
-function BannerForm({ banner, close }: { banner?:Banner; close:()=>void }) { const b=banner; return <form action={saveBanner} className="admin-form admin-editor" onSubmit={close}>{b&&<input type="hidden" name="id" value={b.id}/>}<div className="admin-form-grid"><label>Заголовок RU<input name="title" required defaultValue={b?.title}/></label><label>Заголовок TJ<input name="titleTj" defaultValue={b?.titleTj??""}/></label><label>Переход<input name="targetUrl" defaultValue={b?.targetUrl??""} placeholder="/menu или https://..."/></label><label>Порядок<input name="sortOrder" type="number" min="0" defaultValue={b?.sortOrder??0}/></label></div><label>Текст RU<textarea name="body" defaultValue={b?.body??""}/></label><label>Текст TJ<textarea name="bodyTj" defaultValue={b?.bodyTj??""}/></label><AdminImageInput prefix="banners" defaultValue={b?.imageUrl??""}/><label className="admin-switches"><input name="isActive" type="checkbox" defaultChecked={b?.isActive??true}/> Показывать клиентам</label><button className="admin-save">✓ {b?"Сохранить изменения":"Добавить баннер"}</button></form>; }
-export function BannerManager({ banners }: { banners:Banner[] }) { const [current,setCurrent]=useState<Banner|"new"|null>(null); return <section className="admin-workspace"><header className="admin-workspace-head"><div><p>ГЛАВНЫЙ ЭКРАН</p><h2>Баннеры</h2><span>Карточка повторяет баннер клиента. Карандаш открывает его редактор.</span></div><button className="admin-add" type="button" onClick={()=>setCurrent("new")}>＋ Добавить баннер</button></header><div className="admin-product-grid">{banners.map((banner)=><article className="admin-product-card" key={banner.id}><div className="admin-product-image">{banner.imageUrl?<img src={banner.imageUrl} alt=""/>:<b>DIYOR<br/>BURGER</b>}<button type="button" aria-label={`Изменить ${banner.title}`} onClick={()=>setCurrent(banner)}><Pencil/></button></div><div><span>БАННЕР</span><em className={banner.isActive?"ok":"off"}>{banner.isActive?"Активен":"Выключен"}</em><h3>{banner.title}</h3><p>{banner.body||"Текст не добавлен"}</p></div></article>)}</div>{current&&<Sheet title={current==="new"?"Добавить баннер":current.title} kicker={current==="new"?"НОВЫЙ БАННЕР":"РЕДАКТИРОВАНИЕ"} close={()=>setCurrent(null)}><BannerForm banner={current==="new"?undefined:current} close={()=>setCurrent(null)}/>{current!=="new"&&<footer><form action={archiveBanner}><input type="hidden" name="id" value={current.id}/><button className="danger">Архивировать</button></form></footer>}</Sheet>}</section>; }
+function BannerForm({ banner, close }: { banner?: Banner; close: () => void }) {
+  const b = banner;
+  return (
+    <form
+      action={saveBanner}
+      className="admin-form admin-editor"
+      onSubmit={close}
+    >
+      {b && <input type="hidden" name="id" value={b.id} />}
+      <div className="admin-form-grid">
+        <label>
+          Заголовок RU
+          <input name="title" required defaultValue={b?.title} />
+        </label>
+        <label>
+          Заголовок TJ
+          <input name="titleTj" defaultValue={b?.titleTj ?? ""} />
+        </label>
+        <label>
+          Переход
+          <input
+            name="targetUrl"
+            defaultValue={b?.targetUrl ?? ""}
+            placeholder="/menu или https://..."
+          />
+        </label>
+        <label>
+          Порядок
+          <input
+            name="sortOrder"
+            type="number"
+            min="0"
+            defaultValue={b?.sortOrder ?? 0}
+          />
+        </label>
+      </div>
+      <label>
+        Текст RU
+        <textarea name="body" defaultValue={b?.body ?? ""} />
+      </label>
+      <label>
+        Текст TJ
+        <textarea name="bodyTj" defaultValue={b?.bodyTj ?? ""} />
+      </label>
+      <AdminImageInput prefix="banners" defaultValue={b?.imageUrl ?? ""} />
+      <label className="admin-switches">
+        <input
+          name="isActive"
+          type="checkbox"
+          defaultChecked={b?.isActive ?? true}
+        />{" "}
+        Показывать клиентам
+      </label>
+      <button className="admin-save">
+        ✓ {b ? "Сохранить изменения" : "Добавить баннер"}
+      </button>
+    </form>
+  );
+}
+export function BannerManager({ banners }: { banners: Banner[] }) {
+  const [current, setCurrent] = useState<Banner | "new" | null>(null);
+  return (
+    <section className="admin-workspace">
+      <header className="admin-workspace-head">
+        <div>
+          <p>ГЛАВНЫЙ ЭКРАН</p>
+          <h2>Баннеры</h2>
+          <span>
+            Карточка повторяет баннер клиента. Карандаш открывает его редактор.
+          </span>
+        </div>
+        <button
+          className="admin-add"
+          type="button"
+          onClick={() => setCurrent("new")}
+        >
+          ＋ Добавить баннер
+        </button>
+      </header>
+      <div className="admin-product-grid">
+        {banners.map((banner) => (
+          <article className="admin-product-card" key={banner.id}>
+            <div className="admin-product-image">
+              {banner.imageUrl ? (
+                <img src={banner.imageUrl} alt="" />
+              ) : (
+                <b>
+                  DIYOR
+                  <br />
+                  BURGER
+                </b>
+              )}
+              <button
+                type="button"
+                aria-label={`Изменить ${banner.title}`}
+                onClick={() => setCurrent(banner)}
+              >
+                <Pencil />
+              </button>
+            </div>
+            <div>
+              <span>БАННЕР</span>
+              <em className={banner.isActive ? "ok" : "off"}>
+                {banner.isActive ? "Активен" : "Выключен"}
+              </em>
+              <h3>{banner.title}</h3>
+              <p>{banner.body || "Текст не добавлен"}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+      {current && (
+        <Sheet
+          title={current === "new" ? "Добавить баннер" : current.title}
+          kicker={current === "new" ? "НОВЫЙ БАННЕР" : "РЕДАКТИРОВАНИЕ"}
+          close={() => setCurrent(null)}
+        >
+          <BannerForm
+            banner={current === "new" ? undefined : current}
+            close={() => setCurrent(null)}
+          />
+          {current !== "new" && (
+            <footer>
+              <form action={archiveBanner}>
+                <input type="hidden" name="id" value={current.id} />
+                <button className="danger">Архивировать</button>
+              </form>
+            </footer>
+          )}
+        </Sheet>
+      )}
+    </section>
+  );
+}
 
-function SettingsForm({ settings, close }: { settings:Settings; close:()=>void }) { const labels=settings.benefitLabels??[]; return <form action={saveSettings} className="admin-form admin-editor" onSubmit={close}><div className="admin-form-grid"><label>Название<input name="restaurantName" required defaultValue={settings.restaurantName}/></label><label>WhatsApp, только цифры<input name="whatsapp" required inputMode="tel" defaultValue={settings.whatsapp}/></label><label>Телефон 1<input name="phone1" defaultValue={settings.phone1??""}/></label><label>Телефон 2<input name="phone2" defaultValue={settings.phone2??""}/></label><label>Instagram URL<input name="instagram" type="url" defaultValue={settings.instagram??""}/></label><label>Ссылка на карту<input name="mapUrl" type="url" defaultValue={settings.mapUrl??""}/></label><label>Открытие<input name="openTime" type="time" defaultValue={settings.openTime??""}/></label><label>Закрытие<input name="closeTime" type="time" defaultValue={settings.closeTime??""}/></label></div><label>Основной адрес RU<textarea name="mainAddress" defaultValue={settings.mainAddress}/></label><label>Основной адрес TJ<textarea name="mainAddressTj" defaultValue={settings.mainAddressTj??""}/></label><label className="admin-switches"><input name="pickupEnabled" type="checkbox" defaultChecked={settings.pickupEnabled}/> Самовывоз включён</label><details className="admin-more"><summary>Главный экран, корзина, преимущества и самовывоз</summary><label>Заголовок hero RU<input name="heroTitle" defaultValue={settings.heroTitle??""}/></label><label>Заголовок hero TJ<input name="heroTitleTj" defaultValue={settings.heroTitleTj??""}/></label><label>Подзаголовок hero RU<textarea name="heroSubtitle" defaultValue={settings.heroSubtitle??""}/></label><label>Подзаголовок hero TJ<textarea name="heroSubtitleTj" defaultValue={settings.heroSubtitleTj??""}/></label><AdminImageInput name="heroImage" prefix="settings" defaultValue={settings.heroImage??""}/><label>Преимущество 1<input name="benefit1" defaultValue={labels[0]??"Быстрая доставка"}/></label><label>Преимущество 2<input name="benefit2" defaultValue={labels[1]??"Свежие ингредиенты"}/></label><label>Преимущество 3<input name="benefit3" defaultValue={labels[2]??"Высокое качество"}/></label><label>Преимущество 4<input name="benefit4" defaultValue={labels[3]??"Заказ через WhatsApp"}/></label><label>Текст акции<textarea name="promotionText" defaultValue={settings.promotionText??"При заказе 2 больших пиццы — маленькая пицца в подарок!"}/></label><AdminImageInput name="promotionImage" prefix="settings" defaultValue={settings.promotionImage??""}/><label>Заголовок пустой корзины<input name="cartEmptyTitle" defaultValue={settings.cartEmptyTitle??"Ваша корзина пока пуста"}/></label><label>Текст пустой корзины<textarea name="cartEmptyBody" defaultValue={settings.cartEmptyBody??"Добавьте любимые блюда, хот-доги и другие вкусные позиции из меню."}/></label><label>Кнопка оформления<input name="cartCheckoutLabel" defaultValue={settings.cartCheckoutLabel??"Оформить заказ"}/></label><label>Подпись WhatsApp<input name="cartWhatsappLabel" defaultValue={settings.cartWhatsappLabel??"Подготовить заказ в WhatsApp"}/></label><label>Адрес самовывоза RU<textarea name="pickupAddress" defaultValue={settings.pickupAddress??""}/></label><label>Адрес самовывоза TJ<textarea name="pickupAddressTj" defaultValue={settings.pickupAddressTj??""}/></label><label>Примечание RU<textarea name="pickupNote" defaultValue={settings.pickupNote??""}/></label><label>Примечание TJ<textarea name="pickupNoteTj" defaultValue={settings.pickupNoteTj??""}/></label></details><button className="admin-save">✓ Сохранить и опубликовать</button></form>; }
-export function SettingsManager({ settings }: { settings:Settings }) { const [open,setOpen]=useState(false); const hours=settings.openTime&&settings.closeTime?`${settings.openTime.slice(0,5)}–${settings.closeTime.slice(0,5)}`:"Время работы не указано"; return <section className="admin-workspace"><header className="admin-workspace-head"><div><p>ВИТРИНА И КОНТАКТЫ</p><h2>Настройки ресторана</h2><span>Логотип, главный баннер, адрес и все контакты клиента редактируются в одном месте.</span></div><button className="admin-add" type="button" onClick={()=>setOpen(true)}>✎ Изменить</button></header><div className="admin-product-grid"><article className="admin-product-card"><div className="admin-product-image">{settings.heroImage?<img src={settings.heroImage} alt=""/>:<b>DIYOR<br/>BURGER</b>}<button type="button" aria-label="Изменить настройки" onClick={()=>setOpen(true)}><Pencil/></button></div><div><span>ГЛАВНЫЙ ЭКРАН</span><h3>{settings.restaurantName}</h3><p>{settings.heroTitle||"Заголовок главного экрана"}</p><strong>{hours}</strong></div></article><article className="admin-product-card"><div className="admin-product-image admin-operation-icon"><b>☎</b><button type="button" aria-label="Изменить контакты" onClick={()=>setOpen(true)}><Pencil/></button></div><div><span>КОНТАКТЫ И ЗАКАЗ</span><h3>WhatsApp и адрес</h3><p>{settings.phone1||settings.whatsapp} · {settings.mainAddress||"Адрес не указан"}</p></div></article></div>{open&&<Sheet title="Настройки ресторана" kicker="РЕДАКТИРОВАНИЕ" close={()=>setOpen(false)}><SettingsForm settings={settings} close={()=>setOpen(false)}/></Sheet>}</section>; }
+export function SettingsForm({
+  settings,
+  close,
+}: {
+  settings: Settings;
+  close: () => void;
+}) {
+  const labels = settings.benefitLabels ?? [];
+  return (
+    <form
+      action={saveSettings}
+      className="admin-form admin-editor"
+      onSubmit={close}
+    >
+      <div className="admin-form-grid">
+        <label>
+          Название
+          <input
+            name="restaurantName"
+            required
+            defaultValue={settings.restaurantName}
+          />
+        </label>
+        <label>
+          WhatsApp, только цифры
+          <input
+            name="whatsapp"
+            required
+            inputMode="tel"
+            defaultValue={settings.whatsapp}
+          />
+        </label>
+        <label>
+          Телефон 1<input name="phone1" defaultValue={settings.phone1 ?? ""} />
+        </label>
+        <label>
+          Телефон 2<input name="phone2" defaultValue={settings.phone2 ?? ""} />
+        </label>
+        <label>
+          Instagram URL
+          <input
+            name="instagram"
+            type="url"
+            defaultValue={settings.instagram ?? ""}
+          />
+        </label>
+        <label>
+          Ссылка на карту
+          <input
+            name="mapUrl"
+            type="url"
+            defaultValue={settings.mapUrl ?? ""}
+          />
+        </label>
+        <label>
+          Открытие
+          <input
+            name="openTime"
+            type="time"
+            defaultValue={settings.openTime ?? ""}
+          />
+        </label>
+        <label>
+          Закрытие
+          <input
+            name="closeTime"
+            type="time"
+            defaultValue={settings.closeTime ?? ""}
+          />
+        </label>
+      </div>
+      <label>
+        Основной адрес RU
+        <textarea name="mainAddress" defaultValue={settings.mainAddress} />
+      </label>
+      <label>
+        Основной адрес TJ
+        <textarea
+          name="mainAddressTj"
+          defaultValue={settings.mainAddressTj ?? ""}
+        />
+      </label>
+      <label className="admin-switches">
+        <input
+          name="pickupEnabled"
+          type="checkbox"
+          defaultChecked={settings.pickupEnabled}
+        />{" "}
+        Самовывоз включён
+      </label>
+      <details className="admin-more">
+        <summary>Главный экран, корзина, преимущества и самовывоз</summary>
+        <label>
+          Заголовок hero RU
+          <input name="heroTitle" defaultValue={settings.heroTitle ?? ""} />
+        </label>
+        <label>
+          Заголовок hero TJ
+          <input name="heroTitleTj" defaultValue={settings.heroTitleTj ?? ""} />
+        </label>
+        <label>
+          Подзаголовок hero RU
+          <textarea
+            name="heroSubtitle"
+            defaultValue={settings.heroSubtitle ?? ""}
+          />
+        </label>
+        <label>
+          Подзаголовок hero TJ
+          <textarea
+            name="heroSubtitleTj"
+            defaultValue={settings.heroSubtitleTj ?? ""}
+          />
+        </label>
+        <AdminImageInput
+          name="heroImage"
+          prefix="settings"
+          defaultValue={settings.heroImage ?? ""}
+        />
+        <label>
+          Преимущество 1
+          <input
+            name="benefit1"
+            defaultValue={labels[0] ?? "Быстрая доставка"}
+          />
+        </label>
+        <label>
+          Преимущество 2
+          <input
+            name="benefit2"
+            defaultValue={labels[1] ?? "Свежие ингредиенты"}
+          />
+        </label>
+        <label>
+          Преимущество 3
+          <input
+            name="benefit3"
+            defaultValue={labels[2] ?? "Высокое качество"}
+          />
+        </label>
+        <label>
+          Преимущество 4
+          <input
+            name="benefit4"
+            defaultValue={labels[3] ?? "Заказ через WhatsApp"}
+          />
+        </label>
+        <label>
+          Текст акции
+          <textarea
+            name="promotionText"
+            defaultValue={
+              settings.promotionText ??
+              "При заказе 2 больших пиццы — маленькая пицца в подарок!"
+            }
+          />
+        </label>
+        <AdminImageInput
+          name="promotionImage"
+          prefix="settings"
+          defaultValue={settings.promotionImage ?? ""}
+        />
+        <label>
+          Заголовок пустой корзины
+          <input
+            name="cartEmptyTitle"
+            defaultValue={settings.cartEmptyTitle ?? "Ваша корзина пока пуста"}
+          />
+        </label>
+        <label>
+          Текст пустой корзины
+          <textarea
+            name="cartEmptyBody"
+            defaultValue={
+              settings.cartEmptyBody ??
+              "Добавьте любимые блюда, хот-доги и другие вкусные позиции из меню."
+            }
+          />
+        </label>
+        <label>
+          Кнопка оформления
+          <input
+            name="cartCheckoutLabel"
+            defaultValue={settings.cartCheckoutLabel ?? "Оформить заказ"}
+          />
+        </label>
+        <label>
+          Подпись WhatsApp
+          <input
+            name="cartWhatsappLabel"
+            defaultValue={
+              settings.cartWhatsappLabel ?? "Подготовить заказ в WhatsApp"
+            }
+          />
+        </label>
+        <label>
+          Адрес самовывоза RU
+          <textarea
+            name="pickupAddress"
+            defaultValue={settings.pickupAddress ?? ""}
+          />
+        </label>
+        <label>
+          Адрес самовывоза TJ
+          <textarea
+            name="pickupAddressTj"
+            defaultValue={settings.pickupAddressTj ?? ""}
+          />
+        </label>
+        <label>
+          Примечание RU
+          <textarea
+            name="pickupNote"
+            defaultValue={settings.pickupNote ?? ""}
+          />
+        </label>
+        <label>
+          Примечание TJ
+          <textarea
+            name="pickupNoteTj"
+            defaultValue={settings.pickupNoteTj ?? ""}
+          />
+        </label>
+      </details>
+      <button className="admin-save">✓ Сохранить и опубликовать</button>
+    </form>
+  );
+}
+export function SettingsManager({ settings }: { settings: Settings }) {
+  const [open, setOpen] = useState(false);
+  const hours =
+    settings.openTime && settings.closeTime
+      ? `${settings.openTime.slice(0, 5)}–${settings.closeTime.slice(0, 5)}`
+      : "Время работы не указано";
+  return (
+    <section className="admin-workspace">
+      <header className="admin-workspace-head">
+        <div>
+          <p>ВИТРИНА И КОНТАКТЫ</p>
+          <h2>Настройки ресторана</h2>
+          <span>
+            Логотип, главный баннер, адрес и все контакты клиента редактируются
+            в одном месте.
+          </span>
+        </div>
+        <button
+          className="admin-add"
+          type="button"
+          onClick={() => setOpen(true)}
+        >
+          ✎ Изменить
+        </button>
+      </header>
+      <div className="admin-product-grid">
+        <article className="admin-product-card">
+          <div className="admin-product-image">
+            {settings.heroImage ? (
+              <img src={settings.heroImage} alt="" />
+            ) : (
+              <b>
+                DIYOR
+                <br />
+                BURGER
+              </b>
+            )}
+            <button
+              type="button"
+              aria-label="Изменить настройки"
+              onClick={() => setOpen(true)}
+            >
+              <Pencil />
+            </button>
+          </div>
+          <div>
+            <span>ГЛАВНЫЙ ЭКРАН</span>
+            <h3>{settings.restaurantName}</h3>
+            <p>{settings.heroTitle || "Заголовок главного экрана"}</p>
+            <strong>{hours}</strong>
+          </div>
+        </article>
+        <article className="admin-product-card">
+          <div className="admin-product-image admin-operation-icon">
+            <b>☎</b>
+            <button
+              type="button"
+              aria-label="Изменить контакты"
+              onClick={() => setOpen(true)}
+            >
+              <Pencil />
+            </button>
+          </div>
+          <div>
+            <span>КОНТАКТЫ И ЗАКАЗ</span>
+            <h3>WhatsApp и адрес</h3>
+            <p>
+              {settings.phone1 || settings.whatsapp} ·{" "}
+              {settings.mainAddress || "Адрес не указан"}
+            </p>
+          </div>
+        </article>
+      </div>
+      {open && (
+        <Sheet
+          title="Настройки ресторана"
+          kicker="РЕДАКТИРОВАНИЕ"
+          close={() => setOpen(false)}
+        >
+          <SettingsForm settings={settings} close={() => setOpen(false)} />
+        </Sheet>
+      )}
+    </section>
+  );
+}
