@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useFeedback } from "@/features/feedback/feedback-provider";
 
 type SaveOptions<T> = {
@@ -19,10 +19,12 @@ export function useAdminSave<T>({
 }: SaveOptions<T>) {
   const feedback = useFeedback();
   const [pending, setPending] = useState(false);
+  const inFlight = useRef(false);
   const [error, setError] = useState("");
 
   const submit = async (formData: FormData) => {
-    if (pending) return;
+    if (inFlight.current) return;
+    inFlight.current = true;
     setPending(true);
     setError("");
     try {
@@ -34,6 +36,7 @@ export function useAdminSave<T>({
       setError(message);
       feedback.notify(errorTitle, message);
     } finally {
+      inFlight.current = false;
       setPending(false);
     }
   };
