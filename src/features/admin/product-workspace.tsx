@@ -21,10 +21,10 @@ const Pencil = () => (
   </svg>
 );
 
-function PizzaSizes({ product }: { product: AdminProduct }) {
+function PizzaSizes({ product, close }: { product: AdminProduct; close: () => void }) {
   const variants = product.variants ?? [];
   const router = useRouter();
-  const saved = useAdminSave({action: saveVariant, onSuccess: () => router.refresh(), successTitle: "Размер и цена сохранены", errorTitle: "Не удалось сохранить размер"});
+  const saved = useAdminSave({action: saveVariant, onSuccess: () => { close(); router.refresh(); }, successTitle: "Размер и цена сохранены", errorTitle: "Не удалось сохранить размер"});
   return (
     <section className="admin-pizza-sizes" aria-label="Размеры пиццы">
       <div>
@@ -455,7 +455,7 @@ export function ProductWorkspace({
             />
             {saveError && <p className="admin-form-error" role="alert">{saveError}</p>}
             {current !== "new" && current.productType === "PIZZA" && (
-              <PizzaSizes product={current} />
+              <PizzaSizes product={current} close={() => setCurrent(null)} />
             )}{" "}
             {current !== "new" && (
               <footer>
