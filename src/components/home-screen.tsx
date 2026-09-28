@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { CategoryStrip } from "@/components/menu/category-strip";
 import { ProductGrid } from "@/components/menu/product-grid";
+import { HomeComboCarousel } from "@/components/home-combo-carousel";
 import { FoodImage } from "@/components/menu/food-image";
 import type {
   Category,
@@ -222,7 +223,7 @@ export function HomeScreen({
           </Link>
         </div>
         {combos.length ? (
-          <ProductGrid products={combos.slice(0, 3)} />
+          <HomeComboCarousel combos={combos} autoPlay={!adminMode} />
         ) : (
           <p className="notice">
             {language === "ru"
@@ -251,7 +252,7 @@ export function HomeScreen({
           </Link>
         </div>
         {popular.length ? (
-          <ProductGrid products={popular.slice(0, 4)} />
+          <ProductGrid products={popular} />
         ) : (
           <p className="notice">
             {language === "ru"

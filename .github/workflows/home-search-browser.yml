@@ -1,0 +1,41 @@
+name: Home carousel and search browser regression
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/components/home-*"
+      - "src/components/menu/search-*"
+      - "src/app/search/**"
+      - "src/lib/menu/**"
+      - "tests/browser/home-search.spec.ts"
+      - "playwright.home.config.ts"
+      - ".github/workflows/home-search-browser.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Test full homepage and search
+        run: npx playwright test --config playwright.home.config.ts
+      - name: Upload report and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: home-search-browser-report
+          path: |
+            artifacts/home-search-qa/
+            artifacts/home-search-results/
+          retention-days: 7
+          if-no-files-found: warn

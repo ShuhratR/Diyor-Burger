@@ -1,0 +1,45 @@
+/* Home-only carousel; preserve the existing compact combo-card design. */
+.app-shell .home-combos .home-combo-carousel .product-grid {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 10px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  padding: 3px 1px 9px !important;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 1px;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.home-combo-carousel .product-grid::-webkit-scrollbar { display: none; }
+.app-shell .home-combos .home-combo-carousel .product-card {
+  flex: 0 0 clamp(175px, 35vw, 230px);
+  width: clamp(175px, 35vw, 230px);
+  max-width: 100%;
+  scroll-snap-align: start;
+}
+.home-combo-autoplay {
+  display: block;
+  margin: 2px 0 0 auto;
+  min-height: 30px;
+  padding: 3px 10px;
+  border: 1px solid #ead3ac;
+  border-radius: 100px;
+  background: #fff7e8;
+  color: #7c4513;
+  font-size: .7rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.home-combo-autoplay:focus-visible { outline: 3px solid #d99627; outline-offset: 2px; }
+@media (max-width: 600px) {
+  .app-shell .home-combos .home-combo-carousel .product-card {
+    flex-basis: 154px;
+    width: 154px;
+  }
+  .home-combo-autoplay { min-height: 28px; font-size: .65rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-combo-carousel .product-grid { scroll-behavior: auto !important; }
+}

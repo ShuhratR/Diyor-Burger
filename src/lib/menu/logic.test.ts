@@ -22,3 +22,35 @@ describe("optional old price display", () => {
     expect(productDisplayOldPrice({ ...pizza, variants: variants.map((v, i) => ({ ...v, isActive: i !== 0 })) })).toBe(9000);
   });
 });
+
+describe("search across all categories and filters", () => {
+  it("returns all pizzas on a category keyword even if a product name omits pizza", () => {
+    const pizzas = [
+      { ...fixtureProducts.find(item => item.slug === "pepperoni")!,
+        id: "american", name: "Американская", slug: "american" },
+      { ...fixtureProducts.find(item => item.slug === "pepperoni")!,
+        id: "mushrooms", name: "С грибами", slug: "mushrooms" },
+    ];
+    const results = searchMatches(pizzas, "ПИЦЦА", fixtureCategories);
+    expect(results.map(item => item.slug)).toEqual(["american", "mushrooms"]);
+    expect(searchMatches(pizzas, "пиццы", fixtureCategories)).toHaveLength(2);
+  });
+  it("searches a custom category name and Tajik text", () => {
+    const product = { ...fixtureProducts[0], categoryId: "wings", name: "Острые" };
+    const categories = [...fixtureCategories,
+      { id: "wings", name: "Ножки", nameTj: "Пойҳо", slug: "nozhki", isActive: true, sortOrder: 8 }];
+    expect(searchMatches([product], "Ножки", categories)).toHaveLength(1);
+    expect(searchMatches([product], "Пойҳо", categories)).toHaveLength(1);
+    expect(searchMatches([product], "несуществующее", categories)).toEqual([]);
+  });
+  it("supports search and diram price limits together", () => {
+    const pizzas = searchMatches(fixtureProducts, "пицца", fixtureCategories);
+    expect(filterProducts(pizzas, { minPriceDiram: 6100, maxPriceDiram: 8000 })).toEqual([]);
+    expect(filterProducts(pizzas, { minPriceDiram: 6000, maxPriceDiram: 7000 })).toHaveLength(1);
+    expect(filterProducts(pizzas, { category: "pizza", pizzaSize: "30 см" })).toHaveLength(1);
+  });
+  it("includes names of components when searching combo descriptions", () => {
+    expect(searchMatches(fixtureProducts, "Напиток 0.4", fixtureCategories)
+      .some(product => product.productType === "COMBO")).toBe(true);
+  });
+});
