@@ -20,3 +20,25 @@ export function NavigationFeedback() {
   }, []);
   return <div className={`route-progress ${loading ? "is-loading" : ""}`} aria-hidden="true"><i /></div>;
 }
+
+/** Small universal acknowledgement for taps that do not navigate anywhere. */
+export function ButtonFeedback() {
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      const control = target?.closest<HTMLElement>('button:not(:disabled), [role="button"], input[type="submit"]:not(:disabled)');
+      if (!control) return;
+      control.classList.remove("tap-confirmed");
+      void control.offsetWidth;
+      control.classList.add("tap-confirmed");
+      window.setTimeout(() => control.classList.remove("tap-confirmed"), 520);
+      if (control instanceof HTMLButtonElement && control.type === "submit") {
+        control.classList.add("tap-pending");
+        window.setTimeout(() => control.classList.remove("tap-pending"), 2600);
+      }
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, []);
+  return null;
+}
