@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import type { Product, PublicDeliveryZone, PublicRestaurantSettings } from "@/lib/menu/types";
 import { key, subtotal } from "@/features/cart/logic";
 import { useCart } from "@/features/cart/cart-provider";
@@ -10,6 +9,7 @@ import { FoodImage } from "@/components/menu/food-image";
 import { productDisplayPrice } from "@/lib/menu/logic";
 import { CheckoutForm } from "./checkout-form";
 import { checkoutDraftStorageKey, readCheckoutDraft, saveCheckoutDraft, type CheckoutDraftData } from "./draft";
+import { saveReady } from "./ready";
 
 type CheckoutPageClientProps = {
   products: Product[];
@@ -19,7 +19,6 @@ type CheckoutPageClientProps = {
 
 export function CheckoutPageClient({ products, settings, zones }: CheckoutPageClientProps) {
   const cart = useCart();
-  const router = useRouter();
   const [draft, setDraft] = useState<CheckoutDraftData | null>(null);
   const [draftReady, setDraftReady] = useState(false);
   const availableZones = useMemo(() => zones.filter((zone) => zone.isActive), [zones]);
@@ -49,9 +48,27 @@ export function CheckoutPageClient({ products, settings, zones }: CheckoutPageCl
   if (!availableZones.length && !settings.pickupEnabled) return <section className="section"><h1>Оформление временно недоступно</h1><p className="notice">Сейчас нет доступного способа получения заказа.</p><Link className="cta" href="/menu">Вернуться в меню</Link></section>;
   if (!draftReady) return <section className="section"><h1>Оформление заказа</h1><p className="notice">Загружаем данные формы…</p></section>;
 
-  function continueToReview(data: CheckoutDraftData) {
+  async function continueToWhatsApp(data: CheckoutDraftData) {
     saveCheckoutDraft(sessionStorage, data);
-    router.push("/checkout/review");
+    try {
+      const response = await fetch("/api/checkout/prepare", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ items: cart.items, ...data }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        if (result.code === "PRODUCT_NOT_FOUND" || result.code === "PRODUCT_UNAVAILABLE") return "В корзине есть старое или недоступное блюдо. Удалите его и попробуйте снова.";
+        if (result.code === "VARIANT_UNAVAILABLE") return "Выбранный размер пиццы больше недоступен. Вернитесь в корзину и выберите другой.";
+        if (result.code === "DELIVERY_ZONE_UNAVAILABLE") return "Зона доставки изменилась. Выберите её ещё раз.";
+        if (result.code === "ORDER_WHATSAPP_NOT_CONFIGURED") return "WhatsApp ресторана пока не настроен.";
+        return "Не удалось подготовить заказ. Попробуйте ещё раз.";
+      }
+      saveReady(sessionStorage, result.summary);
+      window.location.assign(result.summary.canonicalWhatsAppUrl);
+    } catch {
+      return "Нет соединения с сервером. Проверьте интернет и попробуйте снова.";
+    }
   }
 
   return <section className="section checkout-reference">
@@ -62,6 +79,6 @@ export function CheckoutPageClient({ products, settings, zones }: CheckoutPageCl
       <FoodImage src={cartLines[0]?.imageUrl ?? settings.heroImageUrl ?? "/images/hero-burger-v1.png"} alt="DIYOR BURGER" />
     </div>
     <aside className="checkout-note" aria-label="Способ подтверждения заказа"><span aria-hidden="true">◉</span><p>Мы свяжемся с вами через WhatsApp для подтверждения заказа.</p></aside>
-    <CheckoutForm cartLines={cartLines} settings={settings} zones={availableZones} subtotalDiram={subtotal(cart.items, products)} initialValues={draft ?? { fulfillment: availableZones.length ? "delivery" : "pickup" }} onSubmit={continueToReview} />
+    <CheckoutForm cartLines={cartLines} settings={settings} zones={availableZones} subtotalDiram={subtotal(cart.items, products)} initialValues={draft ?? { fulfillment: availableZones.length ? "delivery" : "pickup" }} onSubmit={continueToWhatsApp} />
   </section>;
 }

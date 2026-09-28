@@ -21,7 +21,7 @@ export type CheckoutCartPreviewLine = {
 
 type CheckoutFormProps = {
   initialValues?: Partial<CheckoutDraftFields>;
-  onSubmit?: (values: CheckoutDraftData) => void;
+  onSubmit?: (values: CheckoutDraftData) => Promise<string | void> | string | void;
   zones: PublicDeliveryZone[];
   settings: PublicRestaurantSettings;
   subtotalDiram: number;
@@ -38,6 +38,8 @@ export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtota
     comment: initialValues?.comment ?? "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const activeZones = useMemo(() => zones.filter((zone) => zone.isActive), [zones]);
   const selectedZone = activeZones.find((zone) => zone.id === values.zoneId);
   const delivery = values.fulfillment === "pickup"
@@ -53,7 +55,7 @@ export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtota
     });
   }
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const result = validateCheckoutDraft(values, { activeZoneIds: activeZones.map((zone) => zone.id), pickupEnabled: settings.pickupEnabled });
     if (!result.success) {
@@ -61,7 +63,16 @@ export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtota
       return;
     }
     setErrors({});
-    onSubmit?.(result.data);
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      const message = await onSubmit?.(result.data);
+      if (message) setSubmitError(message);
+    } catch {
+      setSubmitError("Не удалось подготовить заказ. Проверьте корзину и попробуйте снова.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return <form className={styles.form} onSubmit={submit} noValidate>
@@ -120,6 +131,7 @@ export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtota
       <div className={styles.summary}><span>Сумма товаров <b>{formatSomoni(subtotalDiram)}</b></span><span>Доставка <b>{values.fulfillment === "pickup" ? formatSomoni(0) : delivery ? delivery.isFreeDelivery ? "Бесплатно" : formatSomoni(delivery.deliveryFeeDiram) : "Выберите район"}</b></span><strong>Итого <b>{formatSomoni(delivery?.totalDiram ?? subtotalDiram)}</b></strong></div>
     </aside>
 
-    <button className={styles.submit} type="submit">Продолжить</button>
+    {submitError && <p className={styles.error} role="alert">{submitError}</p>}
+    <button className={styles.submit} type="submit" disabled={submitting}>{submitting ? "Подготавливаем WhatsApp…" : "Оформить и открыть WhatsApp"}</button>
   </form>;
 }
