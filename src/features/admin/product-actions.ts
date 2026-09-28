@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/admin";
 import { writeAdminAudit } from "@/lib/admin/audit-log";
-import { somoniToDiram } from "@/lib/money";
+import { somoniToDiram, parseOptionalOldPriceDiram } from "@/lib/money";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const productTypes = ["NORMAL", "PIZZA", "COMBO"] as const;
@@ -15,9 +15,9 @@ async function client() { await requireAdmin(); const c = await createSupabaseSe
 function refresh() { ["/admin/products", "/menu", "/", "/combos"].forEach((path) => revalidatePath(path)); }
 
 export async function saveProduct(form: FormData) {
-  const d = schema.parse(values(form)); const price = somoniToDiram(d.price); const oldPrice = somoniToDiram(d.oldPrice);
+  const d = schema.parse(values(form)); const price = somoniToDiram(d.price);
   if (d.productType !== "PIZZA" && (price === null || price < 0)) throw new Error("INVALID_PRICE");
-  if (oldPrice !== null && (price === null || oldPrice <= price)) throw new Error("INVALID_OLD_PRICE");
+  const oldPrice = parseOptionalOldPriceDiram(d.oldPrice, price);
   const c = await client();
   const payload = { category_id:d.categoryId, name:d.name, name_tj:d.nameTj || d.name, description:d.description, description_tj:d.descriptionTj || d.description, slug:d.slug, product_type:d.productType, base_price_diram:d.productType === "PIZZA" ? null : price, old_price_diram:d.productType === "PIZZA" ? null : oldPrice, promotion_label:d.promotionLabel || null, image_url:d.imageUrl || null, sort_order:d.sortOrder, is_available:d.isAvailable, is_active:d.isActive, is_popular:d.isPopular };
   const result = d.id
