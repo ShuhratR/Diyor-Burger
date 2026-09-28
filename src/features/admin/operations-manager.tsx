@@ -123,9 +123,9 @@ function ZoneForm({ zone, close }: { zone?: Zone; close: () => void }) {
           Служебный код (создан автоматически)
           <input
             name="slug"
-            required
             pattern="[a-z0-9-]+"
-            defaultValue={z?.slug ?? `zone-${Date.now()}`}
+            defaultValue={z?.slug ?? ""}
+            placeholder="Создаётся автоматически"
           />
         </label>
         <label>
