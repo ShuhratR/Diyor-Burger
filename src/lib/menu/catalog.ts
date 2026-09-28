@@ -251,7 +251,7 @@ export async function getCheckoutRestaurantSettings() {
   const client = await createSupabaseServerClient();
   if (!client) return demo(fallback);
   const { data, error } = await client
-    .from("restaurant_settings")
+    .from("public_checkout_settings")
     .select(
       "restaurant_name,order_whatsapp_number,pickup_enabled,pickup_address",
     )
