@@ -45,7 +45,10 @@ test("real combo opens a complete, unclipped client preview", async ({ page }) =
 test("public menu previews work in every populated category", async ({ page }) => {
   const response = await page.goto("/menu", { waitUntil: "domcontentloaded" });
   expect(response?.status()).toBe(200);
-  const links = await page.locator('.category-strip a[href^="/menu/"]')
+  // Wait for Next.js streamed catalog content before inspecting category links.
+  const categoryLinks = page.locator('.category-strip a[href^="/menu/"]');
+  await expect(categoryLinks.first()).toBeVisible();
+  const links = await categoryLinks
     .evaluateAll(nodes => [...new Set(nodes.map(node => node.getAttribute("href")).filter(Boolean))] as string[]);
   expect(links.length).toBeGreaterThanOrEqual(4);
   let populated = 0;
@@ -53,6 +56,8 @@ test("public menu previews work in every populated category", async ({ page }) =
     const answer = await page.goto(href, { waitUntil: "domcontentloaded" });
     expect(answer?.status(), "Category " + href).toBe(200);
     const card = page.locator(".product-card-open").first();
+    await page.locator(".category-reference .product-card-open, .category-reference .notice")
+      .first().waitFor({ state: "visible" });
     if (await card.count() === 0) continue;
     populated++;
     await card.click();
