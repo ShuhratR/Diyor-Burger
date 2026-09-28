@@ -7,7 +7,7 @@ import { writeAdminAudit } from "@/lib/admin/audit-log";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const categorySchema = z.object({ id:z.string().uuid().optional(), name:z.string().trim().min(1,"Укажите название на русском").max(80), nameTj:z.string().trim().max(80), slug:z.string().trim().toLowerCase().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/,"Slug: латинские буквы, цифры и дефисы").max(80), imageUrl:z.union([z.literal(""),z.string().url()]), sortOrder:z.coerce.number().int().min(0).max(9999), isActive:z.boolean() });
-function formValue(form: FormData) { return { id:String(form.get("id")??"") || undefined,name:String(form.get("name")??""),nameTj:String(form.get("nameTj")??""),slug:String(form.get("slug")??""),imageUrl:String(form.get("imageUrl")??""),sortOrder:form.get("sortOrder")??0,isActive:form.get("isActive")==="on" }; }
+function formValue(form: FormData) { return { id:String(form.get("id")??"") || undefined,name:String(form.get("name")??""),nameTj:String(form.get("nameTj")??""),slug:String(form.get("slug")||`category-${crypto.randomUUID()}`),imageUrl:String(form.get("imageUrl")??""),sortOrder:form.get("sortOrder")??0,isActive:form.get("isActive")==="on" }; }
 async function adminClient(){ await requireAdmin(); const client=await createSupabaseServerClient(); if(!client) throw new Error("ADMIN_DATA_UNAVAILABLE"); return client; }
 function done(){ revalidatePath("/admin/categories"); revalidatePath("/menu"); revalidatePath("/"); }
 

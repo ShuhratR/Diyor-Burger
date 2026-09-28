@@ -45,7 +45,7 @@ export async function saveZone(f: FormData) {
     id: String(f.get("id") ?? "") || undefined,
     name: String(f.get("name") ?? ""),
     nameTj: String(f.get("nameTj") ?? ""),
-    slug: String(f.get("slug") ?? ""),
+    slug: String(f.get("slug") || `zone-${crypto.randomUUID()}`),
     fee: String(f.get("fee") ?? ""),
     threshold: String(f.get("threshold") ?? ""),
     sortOrder: f.get("sortOrder") ?? 0,

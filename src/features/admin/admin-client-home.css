@@ -340,3 +340,5 @@
     height: 46px;
   }
 }
+
+.admin-editor-sheet .admin-form-error { margin: 4px 0; padding: 10px 12px; border: 1px solid #f4b6ae; border-radius: 10px; background: #fff0ed; color: #a32c1d; font-size: .85rem; font-weight: 700; }

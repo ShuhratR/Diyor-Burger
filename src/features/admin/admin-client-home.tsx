@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
+import { useFeedback } from "@/features/feedback/feedback-provider";
 import { useRouter } from "next/navigation";
 import { HomeScreen } from "@/components/home-screen";
 import { AdminImageInput } from "@/features/admin/admin-image-input";
-import { saveSettings } from "@/features/admin/operations-actions";
+import { saveHomeSection } from "@/features/admin/admin-home-actions";
 import type {
   Category,
   Product,
@@ -49,7 +50,9 @@ export function AdminClientHome({
 }) {
   const [section, setSection] = useState<Section>(null);
   const [preview, setPreview] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, setPending] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const feedback = useFeedback();
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const isSettingsEditor =
@@ -68,14 +71,27 @@ export function AdminClientHome({
               : "/admin/products",
       );
   };
-  const submit = () => {
-    if (!isSettingsEditor || !formRef.current) return;
-    const data = new FormData(formRef.current);
-    startTransition(async () => {
-      await saveSettings(data);
+  const submitData = async (data: FormData) => {
+    if (pending) return;
+    setPending(true);
+    setSaveError("");
+    try {
+      await saveHomeSection(data);
       setSection(null);
       router.refresh();
-    });
+      feedback.notify("Изменения опубликованы");
+    } catch {
+      const message = "Не удалось сохранить раздел. Проверьте поля и повторите попытку.";
+      setSaveError(message);
+      feedback.notify("Ошибка сохранения", message);
+    } finally {
+      setPending(false);
+    }
+  };
+  const submit = () => {
+    if (!isSettingsEditor || !formRef.current || pending) return;
+    const form = formRef.current;
+    if (form.reportValidity()) void submitData(new FormData(form));
   };
   return (
     <div
@@ -152,13 +168,8 @@ export function AdminClientHome({
               <form
                 ref={formRef}
                 className="admin-inline-form"
-                action={(data) =>
-                  startTransition(async () => {
-                    await saveSettings(data);
-                    setSection(null);
-                    router.refresh();
-                  })
-                }
+                action={submitData}
+                aria-busy={pending}
               >
                 {section === "hero" && (
                   <>
@@ -250,190 +261,8 @@ export function AdminClientHome({
                     />
                   </>
                 )}
-                <details>
-                  <summary>Контакты и доставка</summary>
-                  <label>
-                    WhatsApp для заказов
-                    <input
-                      name="whatsapp"
-                      required
-                      inputMode="tel"
-                      defaultValue={settings.whatsapp}
-                    />
-                  </label>
-                  <label>
-                    Телефон
-                    <input
-                      name="phone1"
-                      defaultValue={settings.contactPhone1 ?? ""}
-                    />
-                  </label>
-                  <label>
-                    Адрес
-                    <input
-                      name="mainAddress"
-                      defaultValue={settings.mainAddress}
-                    />
-                  </label>
-                </details>
-                <input
-                  type="hidden"
-                  name="restaurantName"
-                  value={settings.restaurantName}
-                />
-                <input
-                  type="hidden"
-                  name="whatsapp"
-                  value={settings.whatsapp}
-                />
-                <input
-                  type="hidden"
-                  name="phone1"
-                  value={settings.contactPhone1 ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="phone2"
-                  value={settings.contactPhone2 ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="instagram"
-                  value={settings.instagramUrl ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="mainAddress"
-                  value={settings.mainAddress}
-                />
-                <input
-                  type="hidden"
-                  name="mainAddressTj"
-                  value={settings.mainAddress}
-                />
-                <input
-                  type="hidden"
-                  name="pickupAddress"
-                  value={settings.pickupAddress ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="pickupAddressTj"
-                  value={settings.pickupAddress ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="pickupNote"
-                  value={settings.pickupNote ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="pickupNoteTj"
-                  value={settings.pickupNote ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="mapUrl"
-                  value={settings.mapUrl ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="openTime"
-                  value={settings.workOpenTime ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="closeTime"
-                  value={settings.workCloseTime ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="heroTitle"
-                  value={settings.heroTitle ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="heroTitleTj"
-                  value={settings.heroTitle ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="heroSubtitle"
-                  value={settings.heroSubtitle ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="heroSubtitleTj"
-                  value={settings.heroSubtitle ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="heroImage"
-                  value={settings.heroImageUrl ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="benefit1"
-                  value={settings.benefitLabels?.[0] ?? "Быстрая доставка"}
-                />
-                <input
-                  type="hidden"
-                  name="benefit2"
-                  value={settings.benefitLabels?.[1] ?? "Свежие ингредиенты"}
-                />
-                <input
-                  type="hidden"
-                  name="benefit3"
-                  value={settings.benefitLabels?.[2] ?? "Высокое качество"}
-                />
-                <input
-                  type="hidden"
-                  name="benefit4"
-                  value={settings.benefitLabels?.[3] ?? "Заказ через WhatsApp"}
-                />
-                <input
-                  type="hidden"
-                  name="promotionText"
-                  value={
-                    settings.promotionText ??
-                    "При заказе 2 больших пиццы — маленькая пицца в подарок!"
-                  }
-                />
-                <input
-                  type="hidden"
-                  name="promotionImage"
-                  value={settings.promotionImageUrl ?? ""}
-                />
-                <input
-                  type="hidden"
-                  name="cartEmptyTitle"
-                  value={settings.cartEmptyTitle ?? "Ваша корзина пока пуста"}
-                />
-                <input
-                  type="hidden"
-                  name="cartEmptyBody"
-                  value={
-                    settings.cartEmptyBody ??
-                    "Добавьте любимые блюда, хот-доги и другие вкусные позиции из меню."
-                  }
-                />
-                <input
-                  type="hidden"
-                  name="cartCheckoutLabel"
-                  value={settings.cartCheckoutLabel ?? "Оформить заказ"}
-                />
-                <input
-                  type="hidden"
-                  name="cartWhatsappLabel"
-                  value={
-                    settings.cartWhatsappLabel ?? "Подготовить заказ в WhatsApp"
-                  }
-                />
-                <input
-                  type="hidden"
-                  name="pickupEnabled"
-                  value={settings.pickupEnabled ? "on" : ""}
-                />
+                <input type="hidden" name="section" value={section} />
+                {saveError && <p className="admin-form-error" role="alert">{saveError}</p>}
                 <button className="admin-sheet-save" disabled={pending}>
                   {pending ? "Сохранение…" : "Сохранить и опубликовать"}
                 </button>
