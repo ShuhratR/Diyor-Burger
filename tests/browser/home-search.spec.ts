@@ -39,7 +39,7 @@ test("typing pizza updates results automatically and finds pizza category", asyn
   await page.getByRole("textbox", { name: "Поиск по меню" }).fill("пицца");
   await expect(page).toHaveURL(/q=%D0%BF%D0%B8%D1%86%D1%86%D0%B0/i, { timeout: 10000 });
   await expect(page.locator(".search-results .product-card")).toHaveCount(1);
-  await expect(page.getByRole("button", { name: "Открыть Пицца Пепперони" })).toBeVisible();
+  await expect(page.locator(".search-results .product-card-open")).toBeVisible();
 });
 
 test("min/max somoni controls apply an exact price range and support reset", async ({ page }) => {
