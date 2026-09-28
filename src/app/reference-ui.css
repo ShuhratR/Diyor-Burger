@@ -17,7 +17,7 @@
 
 body { background: #fff; color: var(--db-ink); font-family: Arial, Helvetica, sans-serif; }
 .app-shell { max-width: 760px; padding: 0 16px calc(96px + env(safe-area-inset-bottom)); background: #fff; }
-.reference-main { min-width: 0; }
+.reference-main { min-width: 0; padding-bottom:calc(112px + env(safe-area-inset-bottom)); }
 
 /* Header variants */
 .site-header { position: relative; min-height: 76px; grid-template-columns: 44px minmax(110px,1fr) auto; gap: 4px; }
