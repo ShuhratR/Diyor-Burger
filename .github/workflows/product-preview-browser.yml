@@ -1,0 +1,38 @@
+name: Product preview browser regression
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/components/menu/product-quick-view*"
+      - "tests/browser/**"
+      - "playwright.preview.config.ts"
+      - ".github/workflows/product-preview-browser.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify preview on mobile and desktop
+        run: npx playwright test --config playwright.preview.config.ts
+      - name: Upload failure screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-preview-browser-report
+          path: |
+            artifacts/preview-qa/
+            artifacts/preview-results/
+          retention-days: 7
+          if-no-files-found: warn

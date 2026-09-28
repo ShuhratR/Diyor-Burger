@@ -1,0 +1,64 @@
+/* All catalog items share one true viewport dialog, outside clipped card grids. */
+.quick-view-backdrop.quick-view-layer {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+.quick-view-layer .quick-view.quick-view-modal {
+  width: min(100%, 520px);
+  height: min(86dvh, 740px);
+  min-height: 0;
+  max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-rows: minmax(0, min(34dvh, 260px)) minmax(0, 1fr);
+  overflow: hidden;
+  margin: auto;
+  transform-origin: center;
+}
+.quick-view-layer .quick-view-modal .quick-view-image {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.quick-view-layer .quick-view-modal .quick-view-content {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+.quick-view-layer .quick-view-modal .quick-view-close {
+  z-index: 5;
+}
+@media (max-width: 430px) {
+  .quick-view-backdrop.quick-view-layer {
+    place-items: center;
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
+  }
+  .quick-view-layer .quick-view.quick-view-modal {
+    width: 100%;
+    height: min(88dvh, 700px);
+    max-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    grid-template-rows: minmax(0, min(31dvh, 235px)) minmax(0, 1fr);
+  }
+  .quick-view-layer .quick-view-modal .quick-view-image {
+    border-radius: 24px 24px 0 0;
+  }
+  .quick-view-layer .quick-view-modal .quick-view-content {
+    padding: 16px 14px calc(18px + env(safe-area-inset-bottom));
+  }
+}
+@media (max-height: 570px) {
+  .quick-view-layer .quick-view.quick-view-modal {
+    height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    grid-template-rows: minmax(0, min(26dvh, 155px)) minmax(0, 1fr);
+  }
+}
