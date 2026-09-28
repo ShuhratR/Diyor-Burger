@@ -6,9 +6,23 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const types = ["products", "categories", "delivery_zones", "banners"] as const;
 export async function restoreArchived(form: FormData) {
-  const table = z.enum(types).parse(form.get("table")); const id = z.string().uuid().parse(form.get("id"));
-  await requireAdmin(); const client = await createSupabaseServerClient(); if (!client) throw new Error("ADMIN_DATA_UNAVAILABLE");
-  const payload = { archived_at:null, is_active:true };
-  const { error } = await client.from(table).update(payload).eq("id", id); if (error) throw new Error("ARCHIVE_RESTORE_FAILED");
-  ["/admin/archive", "/admin/products", "/admin/categories", "/admin/delivery", "/admin/banners", "/", "/menu"].forEach((path)=>revalidatePath(path));
+  const table = z.enum(types).parse(form.get("table"));
+  const id = z.string().uuid().parse(form.get("id"));
+  await requireAdmin();
+  const client = await createSupabaseServerClient();
+  if (!client) throw new Error("ADMIN_DATA_UNAVAILABLE");
+  const payload = { archived_at: null, is_active: true };
+  const { error } = await client.from(table).update(payload).eq("id", id);
+  if (error) throw new Error("ARCHIVE_RESTORE_FAILED");
+  [
+    "/admin/archive",
+    "/admin/products",
+    "/admin/combos",
+    "/admin/categories",
+    "/admin/delivery",
+    "/admin/banners",
+    "/",
+    "/menu",
+    "/combos",
+  ].forEach((path) => revalidatePath(path));
 }

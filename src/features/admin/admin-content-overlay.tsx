@@ -43,25 +43,37 @@ export function AdminContentOverlay({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [preview, setPreview] = useState(false);
   return (
-    <div className="admin-content-overlay">
+    <div
+      className={`admin-content-overlay${preview ? " admin-client-preview" : ""}`}
+    >
       <aside className="admin-mode-bar" aria-label="Панель администратора">
         <span>
           <i>●</i> Режим администратора · {title}
         </span>
-        <button type="button" onClick={() => setOpen(true)}>
-          ✎ Редактировать
-        </button>
+        <div>
+          <button type="button" onClick={() => setPreview((value) => !value)}>
+            {preview ? "Вернуть редактор" : "Предпросмотр"}
+          </button>
+          {!preview && (
+            <button type="button" onClick={() => setOpen(true)}>
+              ✎ Редактировать
+            </button>
+          )}
+        </div>
       </aside>
       {children}
-      <button
-        className="admin-content-pencil"
-        type="button"
-        aria-label={`Изменить: ${title}`}
-        onClick={() => setOpen(true)}
-      >
-        ✎
-      </button>
+      {!preview && (
+        <button
+          className="admin-content-pencil"
+          type="button"
+          aria-label={`Изменить: ${title}`}
+          onClick={() => setOpen(true)}
+        >
+          ✎
+        </button>
+      )}
       {open && (
         <div
           className="admin-editor-backdrop"
