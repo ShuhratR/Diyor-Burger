@@ -55,3 +55,19 @@ test("checkout rejects malformed request without creating an order", async ({ re
   const payload = await response.json();
   expect(payload).toMatchObject({ ok: false, code: "INVALID_CHECKOUT" });
 });
+
+test("anonymous checkout can read configuration and reject an unknown item", async ({ request }) => {
+  // This is a syntactically valid, non-orderable request. It must never send WhatsApp.
+  // HTTP 503 here reveals missing anonymous access or unavailable production data.
+  const response = await request.post("/api/checkout/prepare", {
+    data: {
+      items: [{ productId: "00000000-0000-4000-8000-000000000001", quantity: 1 }],
+      name: "QA",
+      phone: "900000000",
+      fulfillment: "pickup",
+    },
+  });
+  expect(response.status(), "Anonymous checkout depends on readable settings, products and zones").toBe(400);
+  const payload = await response.json();
+  expect(payload).toMatchObject({ ok: false, code: "PRODUCT_NOT_FOUND" });
+});
