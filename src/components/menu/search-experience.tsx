@@ -88,7 +88,7 @@ export function SearchExperience({ initialQuery, results, suggestions, categorie
           value={Math.min(draft.minPriceDiram ?? 0, maxCatalogPrice || 100)}
           onChange={event => setDraft(value => ({ ...value, minPriceDiram: Math.min(Number(event.target.value), value.maxPriceDiram ?? maxCatalogPrice) }))}/></label>
         <label>До<input type="range" min="0" max={maxCatalogPrice || 100} step="100"
-          value={Math.min(draft.maxPriceDiram ?? maxCatalogPrice || 100, maxCatalogPrice || 100)}
+          value={Math.min(draft.maxPriceDiram ?? (maxCatalogPrice || 100), maxCatalogPrice || 100)}
           onChange={event => setDraft(value => ({ ...value, maxPriceDiram: Math.max(Number(event.target.value), value.minPriceDiram ?? 0) }))}/></label>
       </div>
       {draft.minPriceDiram !== undefined && draft.maxPriceDiram !== undefined && draft.minPriceDiram > draft.maxPriceDiram &&
