@@ -270,9 +270,9 @@ function Editor({
           Slug
           <input
             name="slug"
-            required
             pattern="[a-z0-9-]+"
-            defaultValue={product?.slug ?? `dish-${Date.now()}`}
+            defaultValue={product?.slug ?? ""}
+            placeholder="Создаётся автоматически"
           />
         </label>
       </details>
