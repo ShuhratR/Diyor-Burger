@@ -20,9 +20,12 @@ export async function saveProduct(form: FormData) {
   if (oldPrice !== null && (price === null || oldPrice <= price)) throw new Error("INVALID_OLD_PRICE");
   const c = await client();
   const payload = { category_id:d.categoryId, name:d.name, name_tj:d.nameTj || d.name, description:d.description, description_tj:d.descriptionTj || d.description, slug:d.slug, product_type:d.productType, base_price_diram:d.productType === "PIZZA" ? null : price, old_price_diram:d.productType === "PIZZA" ? null : oldPrice, promotion_label:d.promotionLabel || null, image_url:d.imageUrl || null, sort_order:d.sortOrder, is_available:d.isAvailable, is_active:d.isActive, is_popular:d.isPopular };
-  const result = d.id ? await c.from("products").update(payload).eq("id", d.id) : await c.from("products").insert(payload);
+  const result = d.id
+    ? await c.from("products").update(payload).eq("id", d.id)
+    : await c.from("products").insert(payload).select("id").single();
   if (result.error) throw new Error("PRODUCT_SAVE_FAILED");
   await writeAdminAudit(c, { action:d.id ? "update" : "create", entityType:"product", entityId:d.id, afterData:{ slug:d.slug, oldPrice, promotionLabel:d.promotionLabel } }); refresh();
+  return { id: d.id ?? result.data?.id ?? null };
 }
 export async function toggleProductAvailability(form: FormData) { const id=z.string().uuid().parse(form.get("id")); const current=z.enum(["true","false"]).parse(form.get("current")) === "true"; const c=await client(); const { error }=await c.from("products").update({is_available:!current}).eq("id",id); if(error) throw new Error("PRODUCT_AVAILABILITY_FAILED"); refresh(); }
 export async function archiveProduct(form: FormData) { const id=z.string().uuid().parse(form.get("id")); const c=await client(); const { error }=await c.from("products").update({archived_at:new Date().toISOString(),is_active:false}).eq("id",id); if(error) throw new Error("PRODUCT_ARCHIVE_FAILED"); refresh(); }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import {
   archiveProduct,
@@ -134,11 +135,11 @@ function PizzaSizes({ product }: { product: AdminProduct }) {
 function Editor({
   product,
   categories,
-  close,
+  onSaved,
 }: {
   product?: AdminProduct;
   categories: AdminCategoryOption[];
-  close: () => void;
+  onSaved: (formData: FormData) => Promise<void>;
 }) {
   const [type, setType] = useState<AdminProduct["productType"]>(
     product?.productType ?? "NORMAL",
@@ -156,11 +157,7 @@ function Editor({
   );
   const pizza = type === "PIZZA";
   return (
-    <form
-      action={saveProduct}
-      className="admin-form admin-editor"
-      onSubmit={close}
-    >
+    <form action={onSaved} className="admin-form admin-editor">
       {product && <input type="hidden" name="id" value={product.id} />}
       <div className="admin-form-grid">
         <label>
@@ -237,6 +234,16 @@ function Editor({
         Описание
         <textarea name="description" defaultValue={product?.description} />
       </label>
+      {pizza && (
+        <aside className="admin-pizza-price-note">
+          <b>Цена пиццы задаётся по размеру</b>
+          <span>
+            {product
+              ? "Ниже добавьте или измените размер и его цену."
+              : "Сохраните основу пиццы — затем сразу откроется блок для добавления размеров и цен."}
+          </span>
+        </aside>
+      )}
       <details className="admin-more">
         <summary>Дополнительные поля</summary>
         <label>
@@ -306,9 +313,29 @@ export function ProductWorkspace({
   categories: AdminCategoryOption[];
 }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [current, setCurrent] = useState<AdminProduct | "new" | null>(() =>
-    searchParams.get("new") === "1" ? "new" : null,
+    searchParams.get("edit")
+      ? products.find((product) => product.id === searchParams.get("edit")) ?? null
+      : searchParams.get("new") === "1"
+        ? "new"
+        : null,
   );
+  useEffect(() => {
+    const editing = searchParams.get("edit");
+    if (editing) {
+      setCurrent(products.find((product) => product.id === editing) ?? null);
+    }
+  }, [products, searchParams]);
+  const saveAndContinue = async (formData: FormData) => {
+    const result = await saveProduct(formData);
+    if (result?.id) {
+      router.replace(`/admin/products?edit=${result.id}`);
+      router.refresh();
+      return;
+    }
+    router.refresh();
+  };
   return (
     <section className="admin-workspace">
       <header className="admin-workspace-head">
@@ -402,7 +429,7 @@ export function ProductWorkspace({
             <Editor
               product={current === "new" ? undefined : current}
               categories={categories}
-              close={() => setCurrent(null)}
+              onSaved={saveAndContinue}
             />
             {current !== "new" && current.productType === "PIZZA" && (
               <PizzaSizes product={current} />

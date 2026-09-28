@@ -469,6 +469,18 @@
   color: #705f54;
   font-size: 0.78rem;
 }
+.admin-pizza-price-note {
+  display:grid;
+  gap:4px;
+  margin:0 0 12px;
+  padding:11px 12px;
+  border:1px solid #ffd36a;
+  border-radius:14px;
+  background:#fff7d9;
+  color:#3b1c0c;
+}
+.admin-pizza-price-note b { font-size:.88rem; }
+.admin-pizza-price-note span { color:#765419; font-size:.78rem; line-height:1.35; }
 .admin-variant-wrap {
   display: flex;
   gap: 7px;
