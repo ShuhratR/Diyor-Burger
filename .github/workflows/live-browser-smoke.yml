@@ -1,0 +1,42 @@
+name: Live browser smoke QA
+
+on:
+  pull_request:
+    paths:
+      - "tests/e2e/**"
+      - "playwright.config.ts"
+      - ".github/workflows/live-browser-smoke.yml"
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Live URL of the DIYOR BURGER deployment"
+        required: false
+        default: "https://diyor-nine.vercel.app"
+        type: string
+
+jobs:
+  public-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      QA_BASE_URL: ${{ inputs.base_url || vars.QA_BASE_URL || 'https://diyor-nine.vercel.app' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Browser QA against live site (read-only)
+        run: npx playwright test --config playwright.config.ts
+      - name: Upload screenshots and browser report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-browser-qa
+          path: |
+            artifacts/e2e-report/
+            artifacts/e2e-results/
+          retention-days: 7
+          if-no-files-found: warn
