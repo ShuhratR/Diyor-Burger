@@ -51,7 +51,7 @@ function PizzaSizes({ product, close }: { product: AdminProduct; close: () => vo
               />
             </label>
             <label>
-              Старая цена
+              Старая цена, сомони (необязательно)
               <input
                 name="oldPrice"
                 defaultValue={
@@ -123,8 +123,8 @@ function PizzaSizes({ product, close }: { product: AdminProduct; close: () => vo
           <input name="price" placeholder="0" inputMode="decimal" required />
         </label>
         <label>
-          Старая цена
-          <input name="oldPrice" placeholder="Нет" inputMode="decimal" />
+          Старая цена, сомони (необязательно)
+          <input name="oldPrice" placeholder="Без скидки" inputMode="decimal" />
         </label>
         <label className="admin-inline-check">
           <input name="isAvailable" type="checkbox" defaultChecked /> В наличии
@@ -218,18 +218,17 @@ function Editor({
             placeholder={pizza ? "Цены по размерам" : "0"}
           />
         </label>
-        <label>
-          Старая цена
+        {!pizza && <label>
+          Старая цена, сомони (необязательно)
           <input
             name="oldPrice"
-            disabled={pizza}
             inputMode="decimal"
             defaultValue={
-              product?.oldPriceDiram ? String(product.oldPriceDiram / 100) : ""
+              product?.oldPriceDiram != null ? String(product.oldPriceDiram / 100) : ""
             }
-            placeholder="Без скидки"
+            placeholder="Без скидки — оставьте пустым"
           />
-        </label>
+        </label>}
         <label>
           Ярлык акции
           <input
