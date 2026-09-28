@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import {
@@ -321,17 +321,10 @@ export function ProductWorkspace({
         ? "new"
         : null,
   );
-  useEffect(() => {
-    const editing = searchParams.get("edit");
-    if (editing) {
-      setCurrent(products.find((product) => product.id === editing) ?? null);
-    }
-  }, [products, searchParams]);
   const saveAndContinue = async (formData: FormData) => {
     const result = await saveProduct(formData);
     if (result?.id) {
-      router.replace(`/admin/products?edit=${result.id}`);
-      router.refresh();
+      window.location.assign(`/admin/products?edit=${result.id}`);
       return;
     }
     router.refresh();
