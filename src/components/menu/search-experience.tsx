@@ -38,7 +38,6 @@ export function SearchExperience({ initialQuery, results, suggestions, categorie
   const visibleSuggestions = useMemo(() => searchMatches(suggestions, query, categories).slice(0, 5), [query, suggestions, categories]);
   const hasResults = Boolean(initialQuery || filtersActive);
   useEffect(() => { document.documentElement.dataset.searchFiltersOpen = filtersOpen ? "true" : ""; return () => { delete document.documentElement.dataset.searchFiltersOpen; }; }, [filtersOpen]);
-  useEffect(() => { setQuery(initialQuery); }, [initialQuery]);
   useEffect(() => {
     if (filtersOpen || query.trim() === initialQuery.trim()) return;
     const timer = window.setTimeout(() => {
