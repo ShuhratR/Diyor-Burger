@@ -59,7 +59,7 @@ export function ProductQuickView({ product, onClose }: { product: Product; onClo
     };
   }, [onClose]);
 
-  return createPortal(<div className="quick-view-backdrop quick-view-layer" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+  return createPortal(<div className="quick-view-backdrop quick-view-layer" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { event.preventDefault(); onClose(); } }}>
     <section className={`quick-view quick-view-modal quick-view-${product.productType.toLowerCase()}`} role="dialog" aria-modal="true" aria-labelledby={`product-title-${product.id}`}>
       <button ref={closeButton} type="button" className="quick-view-close" onClick={onClose} aria-label="Закрыть карточку товара"><DiyorIcon name="close-x" /></button>
       <div className="quick-view-image" style={imageStyle}><FoodImage src={product.imageUrl} alt={name} compact /></div>
