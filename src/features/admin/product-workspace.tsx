@@ -22,15 +22,19 @@ const Pencil = () => (
   </svg>
 );
 
-function PizzaSizes({ product, close }: { product: AdminProduct; close: () => void }) {
+function PriceVariants({ product }: { product: AdminProduct }) {
   const variants = product.variants ?? [];
-  const router = useRouter();
-  const saved = useAdminSave({action: saveVariant, onSuccess: () => { close(); router.refresh(); }, successTitle: "Размер и цена сохранены", errorTitle: "Не удалось сохранить размер"});
+  const drink = product.productType === "DRINK";
+  const noun = drink ? "объём" : "размер";
+  const saved = useAdminSave({action: saveVariant,
+    onSuccess: () => { window.location.assign(`/admin/products?edit=${product.id}`); },
+    successTitle: drink ? "Объём и цена сохранены" : "Размер и цена сохранены",
+    errorTitle: drink ? "Не удалось сохранить объём" : "Не удалось сохранить размер"});
   return (
-    <section className="admin-pizza-sizes" aria-label="Размеры пиццы">
+    <section className="admin-pizza-sizes" aria-label={drink ? "Объёмы напитка" : "Размеры пиццы"}>
       <div>
-        <p>РАЗМЕРЫ И ЦЕНЫ</p>
-        <h3>Размеры пиццы</h3>
+        <p>{drink ? "ОБЪЁМЫ И ЦЕНЫ" : "РАЗМЕРЫ И ЦЕНЫ"}</p>
+        <h3>{drink ? "Объёмы напитка" : "Размеры пиццы"}</h3>
         <span>Меняются здесь же — без перехода на отдельную страницу.</span>
       </div>
       {variants.map((variant) => (
@@ -39,7 +43,7 @@ function PizzaSizes({ product, close }: { product: AdminProduct; close: () => vo
             <input type="hidden" name="id" value={variant.id} />
             <input type="hidden" name="productId" value={product.id} />
             <label>
-              Размер
+              {drink ? "Объём" : "Размер"}
               <input name="name" defaultValue={variant.name} required />
             </label>
             <label>
@@ -89,7 +93,7 @@ function PizzaSizes({ product, close }: { product: AdminProduct; close: () => vo
             <button
               type="submit"
               disabled={saved.pending}
-              aria-label={`Сохранить размер ${variant.name}`}
+              aria-label={`Сохранить ${noun} ${variant.name}`}
             >
               ✓
             </button>
@@ -100,7 +104,7 @@ function PizzaSizes({ product, close }: { product: AdminProduct; close: () => vo
             <button
               type="submit"
               className="admin-icon-danger"
-              aria-label={`Архивировать размер ${variant.name}`}
+              aria-label={`Архивировать ${noun} ${variant.name}`}
             >
               ×
             </button>
@@ -116,8 +120,8 @@ function PizzaSizes({ product, close }: { product: AdminProduct; close: () => vo
         <input type="hidden" name="nameTj" value="" />
         <input type="hidden" name="sortOrder" value={variants.length} />
         <label>
-          Новый размер
-          <input name="name" placeholder="Например, 36 см" required />
+          {drink ? "Новый объём" : "Новый размер"}
+          <input name="name" placeholder={drink ? "Например, 0,5 л" : "Например, 36 см"} required />
         </label>
         <label>
           Цена, сомони
@@ -133,7 +137,7 @@ function PizzaSizes({ product, close }: { product: AdminProduct; close: () => vo
         <label className="admin-inline-check">
           <input name="isActive" type="checkbox" defaultChecked /> Видно
         </label>
-        <button type="submit" disabled={saved.pending}>{saved.pending ? "Сохранение…" : "＋ Добавить размер"}</button>
+        <button type="submit" disabled={saved.pending}>{saved.pending ? "Сохранение…" : `＋ Добавить ${noun}`}</button>
       </form>
       {saved.error && <p className="admin-form-error" role="alert">{saved.error}</p>}
     </section>
@@ -160,6 +164,8 @@ function Editor({
     categoryOptions.find((item) =>
       kind === "PIZZA"
         ? /пицц/i.test(item.name)
+        : kind === "DRINK"
+          ? /напит|сок|вод|drink/i.test(item.name)
         : kind === "COMBO"
           ? /комбо/i.test(item.name)
           : !/пицц|комбо/i.test(item.name),
@@ -167,7 +173,7 @@ function Editor({
   const [category, setCategory] = useState(
     product?.categoryId ?? suggested(type),
   );
-  const pizza = type === "PIZZA";
+  const pricedVariants = type === "PIZZA" || type === "DRINK";
   return (
     <>
     <form action={onSaved} aria-busy={pending} className="admin-form admin-editor">
@@ -190,6 +196,7 @@ function Editor({
           >
             <option value="NORMAL">Блюдо</option>
             <option value="PIZZA">Пицца</option>
+            <option value="DRINK">Напиток с объёмами</option>
             <option value="COMBO">Комбо</option>
           </select>
         </label>
@@ -219,18 +226,18 @@ function Editor({
           Цена, сомони
           <input
             name="price"
-            required={!pizza}
-            disabled={pizza}
+            required={!pricedVariants}
+            disabled={pricedVariants}
             inputMode="decimal"
             defaultValue={
               product?.basePriceDiram == null
                 ? ""
                 : String(product.basePriceDiram / 100)
             }
-            placeholder={pizza ? "Цены по размерам" : "0"}
+            placeholder={pricedVariants ? (type === "DRINK" ? "Цены по объёмам" : "Цены по размерам") : "0"}
           />
         </label>
-        {!pizza && <label>
+        {!pricedVariants && <label>
           Старая цена, сомони (необязательно)
           <input
             name="oldPrice"
@@ -254,13 +261,13 @@ function Editor({
         Описание
         <textarea name="description" defaultValue={product?.description} />
       </label>
-      {pizza && (
+      {pricedVariants && (
         <aside className="admin-pizza-price-note">
-          <b>Цена пиццы задаётся по размеру</b>
+          <b>{type === "DRINK" ? "Цена напитка задаётся по объёму" : "Цена пиццы задаётся по размеру"}</b>
           <span>
             {product
-              ? "Ниже добавьте или измените размер и его цену."
-              : "Сохраните основу пиццы — затем сразу откроется блок для добавления размеров и цен."}
+              ? (type === "DRINK" ? "Ниже добавьте или измените объём и его цену." : "Ниже добавьте или измените размер и его цену.")
+              : (type === "DRINK" ? "Сохраните основу напитка — затем добавьте объёмы и цены." : "Сохраните основу пиццы — затем сразу откроется блок для добавления размеров и цен.")}
           </span>
         </aside>
       )}
@@ -363,9 +370,11 @@ export function ProductWorkspace({
     setSaveError("");
     try {
       const result = await saveProduct(formData);
-      const newPizza = current === "new" && formData.get("productType") === "PIZZA";
-      if (newPizza && result?.id) {
-        feedback.notify("Основа пиццы сохранена", "Теперь добавьте размеры и цены.");
+      const newVariantProduct = current === "new" && ["PIZZA", "DRINK"].includes(String(formData.get("productType")));
+      if (newVariantProduct && result?.id) {
+        const drink = formData.get("productType") === "DRINK";
+        feedback.notify(drink ? "Основа напитка сохранена" : "Основа пиццы сохранена",
+          drink ? "Теперь добавьте объёмы и цены." : "Теперь добавьте размеры и цены.");
         window.location.assign(`/admin/products?edit=${result.id}`);
         return;
       }
@@ -422,6 +431,8 @@ export function ProductWorkspace({
               <span>
                 {product.productType === "PIZZA"
                   ? "Пицца"
+                  : product.productType === "DRINK"
+                    ? "Напиток · объёмы"
                   : product.productType === "COMBO"
                     ? "Комбо"
                     : "Блюдо"}
@@ -433,7 +444,7 @@ export function ProductWorkspace({
               <p>{product.description || "Описание ещё не заполнено"}</p>
               <strong>
                 {product.basePriceDiram == null
-                  ? "Цены по размерам"
+                  ? product.productType === "DRINK" ? "Цены по объёмам" : "Цены по размерам"
                   : `${product.basePriceDiram / 100} сом`}
               </strong>
               {product.oldPriceDiram &&
@@ -478,8 +489,8 @@ export function ProductWorkspace({
               pending={savePending}
             />
             {saveError && <p className="admin-form-error" role="alert">{saveError}</p>}
-            {current !== "new" && current.productType === "PIZZA" && (
-              <PizzaSizes product={current} close={() => setCurrent(null)} />
+            {current !== "new" && (current.productType === "PIZZA" || current.productType === "DRINK") && (
+              <PriceVariants product={current} />
             )}{" "}
             {current !== "new" && (
               <footer>
