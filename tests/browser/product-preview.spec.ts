@@ -91,11 +91,17 @@ test("the same preview works from a category, search results, and favorites", as
   dialog = await openPreview(page, "/search?q=Гамбургер", "Гамбургер");
   await expectViewportOverlay(page);
   await page.keyboard.press("Escape");
-  // The catalog design intentionally hides the favorite toggle; seed the local
-  // fixture entry to test the shared preview on the favorites route itself.
+  // Toggle favorites through the real UI; directly setting localStorage is racy
+  // because the FavoritesProvider persists its state after hydration.
   await page.goto("/menu");
-  await page.evaluate(() => localStorage.setItem("diyor-favorites",
-    JSON.stringify({ version: 1, ids: ["hamburger"] })));
+  const burgerCard = page.locator(".product-card").filter({
+    has: page.locator('.product-card-open[aria-label="Открыть Гамбургер"]'),
+  }).first();
+  await burgerCard.getByRole("button", { name: "Добавить в избранное" }).click();
+  await expect(burgerCard.getByRole("button", { name: "Удалить из избранного" })).toBeVisible();
+  await expect.poll(async () => page.evaluate(() =>
+    JSON.parse(localStorage.getItem("diyor-favorites") || '{"ids":[]}').ids.includes("hamburger"),
+  )).toBe(true);
   await page.goto("/favorites", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("button", { name: "Открыть Гамбургер", exact: true })).toBeVisible();
   const favoriteOpener = page.getByRole("button", { name: "Открыть Гамбургер", exact: true });
