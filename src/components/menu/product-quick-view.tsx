@@ -10,6 +10,7 @@ import { ProductPurchase } from "./product-purchase";
 import { VariantSelector } from "./variant-selector";
 import { formatSomoni } from "@/lib/money";
 import { productDisplayPrice } from "@/lib/menu/logic";
+import { hasPricedVariants } from "@/lib/menu/variant-kind";
 import type { Product } from "@/lib/menu/types";
 import { copy, localizedDescription, localizedIngredients, localizedName } from "@/lib/i18n";
 
@@ -21,7 +22,7 @@ export function ProductQuickView({ product, onClose }: { product: Product; onClo
   const description = localizedDescription(product, language);
   const ingredients = localizedIngredients(product, language);
   const price = productDisplayPrice(product);
-  const kind = product.productType === "COMBO" ? t.combos : product.productType === "PIZZA" ? "Пицца" : "Блюдо";
+  const kind = product.productType === "COMBO" ? t.combos : product.productType === "PIZZA" ? "Пицца" : product.productType === "DRINK" ? "Напиток" : "Блюдо";
   const imageStyle = product.imageUrl ? { "--quick-view-image": `url("${product.imageUrl}")` } as CSSProperties : undefined;
 
   useEffect(() => {
@@ -68,7 +69,7 @@ export function ProductQuickView({ product, onClose }: { product: Product; onClo
         <h2 id={`product-title-${product.id}`}>{name}</h2>
         {description.trim() && <p className="quick-view-description">{description}</p>}
         {product.productType === "COMBO" && product.comboComponents?.length ? <section className="quick-view-section"><h3>Что входит в комбо</h3><ul>{product.comboComponents.map((component) => <li key={component.id}><b>{component.name}</b><span>{component.quantity} шт.{component.description ? ` · ${component.description}` : ""}</span></li>)}</ul></section> : ingredients.trim() && <section className="quick-view-section"><h3>Состав</h3><p>{ingredients}</p></section>}
-        {product.productType === "PIZZA" ? <div className="quick-view-variants"><VariantSelector productId={product.id} productName={name} variants={product.variants ?? []} /></div> : <><div className="quick-view-price"><strong>{price === undefined ? "—" : formatSomoni(price)}</strong>{price !== undefined && product.oldPriceDiram != null && product.oldPriceDiram > price && <del>{formatSomoni(product.oldPriceDiram)}</del>}<span className={product.isAvailable ? "in-stock" : "out-of-stock"}>{product.isAvailable ? "В наличии" : t.unavailable}</span></div><ProductPurchase productId={product.id} productName={name} available={product.isAvailable} /></>}
+        {hasPricedVariants(product.productType) ? <div className="quick-view-variants"><VariantSelector productType={product.productType === "DRINK" ? "DRINK" : "PIZZA"} productAvailable={product.isAvailable} productId={product.id} productName={name} variants={product.variants ?? []} /></div> : <><div className="quick-view-price"><strong>{price === undefined ? "—" : formatSomoni(price)}</strong>{price !== undefined && product.oldPriceDiram != null && product.oldPriceDiram > price && <del>{formatSomoni(product.oldPriceDiram)}</del>}<span className={product.isAvailable ? "in-stock" : "out-of-stock"}>{product.isAvailable ? "В наличии" : t.unavailable}</span></div><ProductPurchase productId={product.id} productName={name} available={product.isAvailable} /></>}
       </div>
     </section>
   </div>, document.body);
