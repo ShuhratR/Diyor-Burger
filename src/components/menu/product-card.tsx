@@ -30,7 +30,7 @@ export function ProductCard({ product }: { product: Product }) {
   function addToCart() {
     if (addState !== "idle") return;
     setAddState("adding");
-    window.setTimeout(() => { cart.addItem({ productId: product.id, quantity: 1 }); setAddState("added"); feedback.notify("Добавлено в корзину", name); window.setTimeout(() => setAddState("idle"), 1300); }, 220);
+    window.setTimeout(() => { cart.addItem({ productId: product.id, quantity: 1, productName: product.name }); setAddState("added"); feedback.notify("Добавлено в корзину", name); window.setTimeout(() => setAddState("idle"), 1300); }, 220);
   }
 
   function toggleFavorite() { const wasFavorite = favorites.has(product.id); favorites.toggle(product.id); feedback.notify(wasFavorite ? "Удалено из избранного" : "Добавлено в избранное", name); }
