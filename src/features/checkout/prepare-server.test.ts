@@ -25,3 +25,29 @@ describe("recovery for invalid cart lines", () => {
       fixtureProducts,zones,settings)).toMatchObject({ok:false,code:"INVALID_CHECKOUT"});
   });
 });
+
+describe("priced non-alcoholic beverage selections",()=>{
+  const beverage={...fixtureProducts.find(p=>p.id==="pepperoni")!,id:"soda-example",
+    categoryId:"drinks",productType:"DRINK" as const,name:"Лимонад",
+    variants:[
+      {id:"small",name:"0,5 л",priceDiram:700,isActive:true,isAvailable:true,sortOrder:0},
+      {id:"large",name:"1 л",priceDiram:1200,isActive:true,isAvailable:true,sortOrder:1},
+      {id:"sold-out",name:"1,5 л",priceDiram:1500,isActive:true,isAvailable:false,sortOrder:2},
+    ]};
+  const products=[...fixtureProducts,beverage];
+  it("needs a chosen available volume",()=>{
+    expect(prepareCheckout({...base,items:[{productId:beverage.id,quantity:1}]},
+      products,zones,settings)).toMatchObject({ok:false,code:"VARIANT_UNAVAILABLE"});
+    expect(prepareCheckout({...base,items:[{productId:beverage.id,variantId:"sold-out",quantity:1}]},
+      products,zones,settings)).toMatchObject({ok:false,code:"VARIANT_UNAVAILABLE"});
+  });
+  it("calculates using the authoritative price and labels the order",()=>{
+    const result=prepareCheckout({...base,items:[{productId:beverage.id,variantId:"large",quantity:2}]},
+      products,zones,settings);
+    expect(result.ok).toBe(true);
+    if(!result.ok)return;
+    expect(result.summary.subtotalDiram).toBe(2400);
+    expect(result.summary.items[0].variant).toBe("1 л");
+    expect(decodeURIComponent(result.summary.canonicalWhatsAppUrl)).toContain("Лимонад (1 л) × 2");
+  });
+});
