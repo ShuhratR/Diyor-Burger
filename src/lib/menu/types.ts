@@ -33,7 +33,7 @@ export type ComboComponent = {
   quantity: number;
   sortOrder: number;
 };
-export type ProductType = "NORMAL" | "PIZZA" | "COMBO";
+export type ProductType = "NORMAL" | "PIZZA" | "DRINK" | "COMBO";
 export type Product = {
   id: string;
   categoryId: string;
