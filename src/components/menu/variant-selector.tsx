@@ -30,7 +30,7 @@ export function VariantSelector({
     if (!variant || !selectable || adding) return;
     setAdding(true);
     window.setTimeout(() => {
-      cart.addItem({ productId, variantId: variant.id, quantity: 1 });
+      cart.addItem({ productId, variantId: variant.id, quantity: 1, productName: productName ?? (productType === "DRINK" ? "Напиток" : "Пицца"), variantName: variant.name });
       feedback.notify(
         "Добавлено в корзину",
         `${productName ?? "Пицца"} · ${variant.name}`,
