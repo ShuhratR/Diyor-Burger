@@ -82,8 +82,8 @@ test("combo carousel resumes after closing a quick view, retaining manual pause"
   await expect(page.getByRole("dialog", { name: /Комбо/ })).toHaveCount(0);
   await expect.poll(async () => rail.evaluate(element => element.scrollLeft), { timeout: 6500 }).toBeGreaterThan(4);
 
-  // The "+" shortcut opens the same quick view, and Escape closes it.
-  await carousel.locator(".product-card").first().locator(".card-actions button").last().click();
+  // Reopening the same card and closing with Escape also restarts autoplay.
+  await carousel.locator(".product-card-open").first().click();
   await expect(page.getByRole("dialog", { name: /Комбо/ })).toBeVisible();
   await rail.evaluate(element => element.scrollTo({ left: 0, behavior: "instant" }));
   await page.keyboard.press("Escape");
