@@ -2,6 +2,7 @@ import { z } from "zod";
 import { calculateDelivery, type DeliveryZone } from "@/lib/delivery";
 import { formatSomoni } from "@/lib/money";
 import { activeVariants, productDisplayPrice } from "@/lib/menu/logic";
+import { hasPricedVariants } from "@/lib/menu/variant-kind";
 import type { Product } from "@/lib/menu/types";
 export type Fulfillment = "delivery" | "pickup";
 export const normalizePhone = (v: string) => {
@@ -18,7 +19,7 @@ export const checkoutSchema = z.object({
         quantity: z.number().int().min(1).max(99),
       }),
     )
-    .min(1),
+    .min(1).max(50),
   name: z.string().trim().min(2).max(100),
   phone: z
     .string()
@@ -56,7 +57,8 @@ export function prepare(
     const v = i.variantId
       ? activeVariants(p).find((a) => a.id === i.variantId)
       : undefined;
-    if (p.productType === "PIZZA" && !v) throw Error("VARIANT_UNAVAILABLE");
+    if (hasPricedVariants(p.productType) && !v) throw Error("VARIANT_UNAVAILABLE");
+    if (!hasPricedVariants(p.productType) && i.variantId) throw Error("VARIANT_UNAVAILABLE");
     const price = v?.priceDiram ?? productDisplayPrice(p);
     if (price === undefined) throw Error("PRODUCT_NOT_FOUND");
     return {
