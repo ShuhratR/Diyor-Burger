@@ -48,3 +48,23 @@ describe("archived/unavailable cart recovery", () => {
       .toMatchObject([{ code: "VARIANT_UNAVAILABLE" }]);
   });
 });
+
+
+describe("drink volume unavailable-cart recovery", () => {
+  const drink = { ...pizza, id: "drink-cola", name: "Coca-Cola", categoryId: "drinks",
+    productType: "DRINK" as const, variants: [
+      { id: "cola-05", name: "0,5 л", priceDiram: 700, isActive: true, isAvailable: true, sortOrder: 0 },
+      { id: "cola-1", name: "1 л", priceDiram: 1200, isActive: true, isAvailable: false, sortOrder: 1 },
+    ] };
+  it("names an unavailable drink volume without deleting a valid line", () => {
+    const issues = unavailableCartItems([
+      { productId: burger.id }, { productId: drink.id, variantId: "cola-1" },
+    ], [burger, drink]);
+    expect(issues).toMatchObject([{ code: "VARIANT_UNAVAILABLE", index: 1,
+      name: "Coca-Cola", variantName: "1 л" }]);
+  });
+  it("blocks a drink without a selected volume", () => {
+    expect(unavailableCartItems([{ productId: drink.id }], [drink]))
+      .toMatchObject([{ code: "VARIANT_UNAVAILABLE" }]);
+  });
+});
