@@ -64,3 +64,28 @@ test("search categories are not truncated to the first three", async ({ page }) 
   const allCategoryLinks = page.locator(".search-result-top .filter-row a");
   await expect(allCategoryLinks).toHaveCount(8);
 });
+
+
+// The modal temporarily pauses autoplay, but closing it must restart even
+// though focus is restored to the original combo card.
+test("combo carousel resumes after closing a quick view, retaining manual pause", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const carousel = page.getByRole("region", { name: "Комбо DIYOR BURGER" });
+  const rail = carousel.locator(".product-grid");
+  await carousel.locator(".product-card-open").first().click();
+  await expect(page.getByRole("dialog", { name: /Комбо/ })).toBeVisible();
+  await rail.evaluate(element => element.scrollTo({ left: 0, behavior: "instant" }));
+  await page.waitForTimeout(3100);
+  expect(await rail.evaluate(element => element.scrollLeft)).toBeLessThan(4);
+  await page.getByRole("button", { name: "Закрыть карточку товара" }).click();
+  await expect(page.getByRole("dialog", { name: /Комбо/ })).toHaveCount(0);
+  await expect.poll(async () => rail.evaluate(element => element.scrollLeft), { timeout: 6500 }).toBeGreaterThan(4);
+
+  // A deliberate press of the Pause control must still persist.
+  await carousel.getByRole("button", { name: "Остановить автоматическую прокрутку комбо" }).click();
+  await expect(carousel.getByRole("button", { name: "Включить автоматическую прокрутку комбо" })).toBeVisible();
+  await rail.evaluate(element => element.scrollTo({ left: 0, behavior: "instant" }));
+  await page.waitForTimeout(3100);
+  expect(await rail.evaluate(element => element.scrollLeft)).toBeLessThan(4);
+});

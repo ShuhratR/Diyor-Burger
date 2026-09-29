@@ -20,10 +20,28 @@ export function HomeComboCarousel({
   const resumeAt = useRef(0);
   const hovering = useRef(false);
   const focused = useRef(false);
+  const ignoreRestoredFocus = useRef(false);
+  const ignoreHoverUntilExit = useRef(false);
   const [paused, setPaused] = useState(false);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
+
+  function onQuickViewChange(open: boolean) {
+    if (open) {
+      setQuickViewOpen(true);
+      return;
+    }
+    // The dialog restores focus to its opener on unmount. That restored
+    // focus must not leave autoplay paused forever.
+    ignoreRestoredFocus.current = true;
+    ignoreHoverUntilExit.current = true;
+    focused.current = false;
+    hovering.current = false;
+    resumeAt.current = 0;
+    setQuickViewOpen(false);
+  }
 
   useEffect(() => {
-    if (!autoPlay || paused || combos.length < 2) return;
+    if (!autoPlay || paused || quickViewOpen || combos.length < 2) return;
     const id = window.setInterval(() => {
       if (document.hidden || hovering.current || focused.current ||
         Date.now() < resumeAt.current ||
@@ -45,7 +63,7 @@ export function HomeComboCarousel({
       }
     }, ADVANCE_EVERY_MS);
     return () => window.clearInterval(id);
-  }, [autoPlay, combos.length, paused]);
+  }, [autoPlay, combos.length, paused, quickViewOpen]);
 
   function delayAutoPlay() {
     resumeAt.current = Date.now() + RESUME_AFTER_INTERACTION_MS;
@@ -58,21 +76,33 @@ export function HomeComboCarousel({
       aria-roledescription="карусель"
       aria-label="Комбо DIYOR BURGER"
       ref={railRef}
-      onMouseEnter={() => { hovering.current = true; }}
-      onMouseLeave={() => { hovering.current = false; delayAutoPlay(); }}
+      onMouseEnter={() => { if (!ignoreHoverUntilExit.current) hovering.current = true; }}
+      onMouseLeave={() => {
+        const wasIgnoring = ignoreHoverUntilExit.current;
+        ignoreHoverUntilExit.current = false;
+        hovering.current = false;
+        if (!wasIgnoring && !quickViewOpen) delayAutoPlay();
+      }}
       onPointerDown={delayAutoPlay}
       onTouchStart={delayAutoPlay}
       onWheel={delayAutoPlay}
       onKeyDown={delayAutoPlay}
-      onFocusCapture={() => { focused.current = true; }}
+      onFocusCapture={() => {
+        if (ignoreRestoredFocus.current) {
+          ignoreRestoredFocus.current = false;
+          focused.current = false;
+        } else {
+          focused.current = true;
+        }
+      }}
       onBlurCapture={event => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
           focused.current = false;
-          delayAutoPlay();
+          if (!ignoreRestoredFocus.current && !quickViewOpen) delayAutoPlay();
         }
       }}
     >
-      <ProductGrid products={combos} />
+      <ProductGrid products={combos} onQuickViewChange={onQuickViewChange} />
       {autoPlay && combos.length > 1 && (
         <button
           type="button"
