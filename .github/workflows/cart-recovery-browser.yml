@@ -1,0 +1,37 @@
+name: Cart recovery browser regression
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/features/cart/**"
+      - "src/features/checkout/**"
+      - "src/lib/menu/**"
+      - "tests/browser/cart-unavailable.spec.ts"
+      - "playwright.cart.config.ts"
+      - ".github/workflows/cart-recovery-browser.yml"
+permissions:
+  contents: read
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Test unavailable cart on mobile
+        run: npx playwright test --config playwright.cart.config.ts
+      - name: Upload failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cart-browser-report
+          path: |
+            test-results/
+            artifacts/
+          retention-days: 7
+          if-no-files-found: warn
