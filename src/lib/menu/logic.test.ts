@@ -54,3 +54,22 @@ describe("search across all categories and filters", () => {
       .some(product => product.productType === "COMBO")).toBe(true);
   });
 });
+
+describe("drink volume catalog prices", () => {
+  const cola={...fixtureProducts.find(p=>p.id==="pepperoni")!,id:"cola-test",
+    categoryId:"drinks",productType:"DRINK" as const,name:"Coca-Cola",variants:[
+      {id:"s",name:"0,5 л",priceDiram:700,oldPriceDiram:900,isActive:true,isAvailable:true,sortOrder:0},
+      {id:"m",name:"1 л",priceDiram:1200,isActive:true,isAvailable:true,sortOrder:1},
+      {id:"l",name:"1,5 л",priceDiram:1500,isActive:true,isAvailable:false,sortOrder:2},
+    ]};
+  it("shows the first available volume and its own old price",()=>{
+    expect(productDisplayPrice(cola)).toBe(700);
+    expect(productDisplayOldPrice(cola)).toBe(900);
+    expect(activeVariants(cola).map(v=>v.name)).toEqual(["0,5 л","1 л"]);
+  });
+  it("does not price a card using an unavailable volume",()=>{
+    const updated={...cola,variants:cola.variants.map(v=>({...v,isAvailable:v.id!=="s"}))};
+    expect(productDisplayPrice(updated)).toBe(1200);
+    expect(productDisplayOldPrice(updated)).toBeUndefined();
+  });
+});
