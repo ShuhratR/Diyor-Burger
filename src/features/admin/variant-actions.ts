@@ -5,12 +5,22 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { somoniToDiram, parseOptionalOldPriceDiram } from "@/lib/money";
 import { blocksLastOrderableVariantArchive } from "@/lib/admin/variant-archive";
+import { hasPricedVariants } from "@/lib/menu/variant-kind";
+import type { ProductType } from "@/lib/menu/types";
 
 const schema=z.object({id:z.string().uuid().optional(),productId:z.string().uuid(),name:z.string().trim().min(1).max(80),nameTj:z.string().trim().max(80),price:z.string(),oldPrice:z.string(),sortOrder:z.coerce.number().int().min(0).max(9999),isActive:z.boolean(),isAvailable:z.boolean()});
 function values(form:FormData){return{id:String(form.get("id")??"")||undefined,productId:String(form.get("productId")??""),name:String(form.get("name")??""),nameTj:String(form.get("nameTj")??""),price:String(form.get("price")??""),oldPrice:String(form.get("oldPrice")??""),sortOrder:form.get("sortOrder")??0,isActive:form.get("isActive")==="on",isAvailable:form.get("isAvailable")==="on"};}
 async function client(){await requireAdmin();const c=await createSupabaseServerClient();if(!c)throw new Error("ADMIN_DATA_UNAVAILABLE");return c;}
 function refresh(id:string){["/admin/products",`/admin/products/${id}`,"/menu","/"].forEach((path)=>revalidatePath(path));}
-export async function saveVariant(form:FormData){const d=schema.parse(values(form));const price=somoniToDiram(d.price);if(price===null||price<0)throw new Error("INVALID_VARIANT_PRICE");const oldPrice=parseOptionalOldPriceDiram(d.oldPrice,price);const c=await client();const payload={product_id:d.productId,name:d.name,name_tj:d.nameTj||d.name,price_diram:price,old_price_diram:oldPrice,sort_order:d.sortOrder,is_active:d.isActive,is_available:d.isAvailable};const r=d.id?await c.from("product_variants").update(payload).eq("id",d.id):await c.from("product_variants").insert(payload);if(r.error)throw new Error("VARIANT_SAVE_FAILED");refresh(d.productId);}
+export async function saveVariant(form:FormData){const d=schema.parse(values(form));const price=somoniToDiram(d.price);if(price===null||price<0)throw new Error("INVALID_VARIANT_PRICE");const oldPrice=parseOptionalOldPriceDiram(d.oldPrice,price);const c=await client();
+  const {data: parent,error: parentError}=await c.from("products")
+    .select("product_type").eq("id",d.productId).is("archived_at",null).single();
+  if(parentError||!parent||!hasPricedVariants(parent.product_type as ProductType))
+    throw new Error("VARIANTS_REQUIRE_PIZZA_OR_DRINK");
+  const payload={product_id:d.productId,name:d.name,name_tj:d.nameTj||d.name,price_diram:price,old_price_diram:oldPrice,sort_order:d.sortOrder,is_active:d.isActive,is_available:d.isAvailable};const r=d.id
+    ? await c.from("product_variants").update(payload).eq("id",d.id).eq("product_id",d.productId).is("archived_at",null).select("id").maybeSingle()
+    : await c.from("product_variants").insert(payload).select("id").maybeSingle();
+  if(r.error||!r.data)throw new Error("VARIANT_SAVE_FAILED");refresh(d.productId);}
 export async function archiveVariant(form: FormData) {
   const id = z.string().uuid().parse(form.get("id"));
   const productId = z.string().uuid().parse(form.get("productId"));

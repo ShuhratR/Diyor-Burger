@@ -26,9 +26,11 @@ type CheckoutFormProps = {
   settings: PublicRestaurantSettings;
   subtotalDiram: number;
   cartLines: CheckoutCartPreviewLine[];
+  blocked?: boolean;
+  onResolveUnavailable?: () => void;
 };
 
-export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtotalDiram, cartLines }: CheckoutFormProps) {
+export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtotalDiram, cartLines, blocked = false, onResolveUnavailable }: CheckoutFormProps) {
   const [values, setValues] = useState<CheckoutDraftFields>({
     name: initialValues?.name ?? "",
     phone: initialValues?.phone ?? "",
@@ -57,6 +59,7 @@ export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtota
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (blocked) { onResolveUnavailable?.(); return; }
     const result = validateCheckoutDraft(values, { activeZoneIds: activeZones.map((zone) => zone.id), pickupEnabled: settings.pickupEnabled });
     if (!result.success) {
       setErrors(result.errors);
@@ -131,7 +134,8 @@ export function CheckoutForm({ initialValues, onSubmit, zones, settings, subtota
       <div className={styles.summary}><span>Сумма товаров <b>{formatSomoni(subtotalDiram)}</b></span><span>Доставка <b>{values.fulfillment === "pickup" ? formatSomoni(0) : delivery ? delivery.isFreeDelivery ? "Бесплатно" : formatSomoni(delivery.deliveryFeeDiram) : "Выберите район"}</b></span><strong>Итого <b>{formatSomoni(delivery?.totalDiram ?? subtotalDiram)}</b></strong></div>
     </aside>
 
+    {blocked && <p className={styles.error} role="status">В корзине есть недоступное блюдо. <button type="button" onClick={onResolveUnavailable}>Посмотреть и удалить</button></p>}
     {submitError && <p className={styles.error} role="alert">{submitError}</p>}
-    <button className={styles.submit} type="submit" disabled={submitting}>{submitting ? "Подготавливаем WhatsApp…" : "Оформить и открыть WhatsApp"}</button>
+    <button className={styles.submit} type="submit" disabled={submitting || blocked}>{submitting ? "Подготавливаем WhatsApp…" : "Оформить и открыть WhatsApp"}</button>
   </form>;
 }
