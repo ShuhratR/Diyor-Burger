@@ -16,6 +16,8 @@ import { copy, localizedDescription, localizedIngredients, localizedName } from 
 
 export function ProductQuickView({ product, onClose }: { product: Product; onClose: () => void }) {
   const closeButton = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
   const { language } = useLanguage();
   const t = copy[language];
   const name = localizedName(product, language);
@@ -35,7 +37,7 @@ export function ProductQuickView({ product, onClose }: { product: Product; onClo
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (event.key !== "Tab") return;
@@ -58,7 +60,7 @@ export function ProductQuickView({ product, onClose }: { product: Product; onClo
       document.removeEventListener("keydown", onKeyDown);
       opener?.focus({ preventScroll: true });
     };
-  }, [onClose]);
+  }, []);
 
   return createPortal(<div className="quick-view-backdrop quick-view-layer" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { event.preventDefault(); onClose(); } }}>
     <section className={`quick-view quick-view-modal quick-view-${product.productType.toLowerCase()}`} role="dialog" aria-modal="true" aria-labelledby={`product-title-${product.id}`}>
