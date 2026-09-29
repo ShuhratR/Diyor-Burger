@@ -1,0 +1,45 @@
+name: Staged cart and drink regression
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/features/cart/**"
+      - "src/features/checkout/**"
+      - "src/features/admin/product-*"
+      - "src/features/admin/variant-actions.ts"
+      - "src/lib/menu/**"
+      - "src/components/menu/**"
+      - "src/app/product/**"
+      - "supabase/migrations/2026093001*.sql"
+      - "tests/browser/cart-unavailable.spec.ts"
+      - "playwright.cart-drinks.config.ts"
+      - ".github/workflows/cart-drink-regression.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Stale cart browser scenarios (no live orders)
+        run: npx playwright test --config playwright.cart-drinks.config.ts
+      - name: Upload failure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cart-drink-browser-report
+          path: |
+            artifacts/cart-drinks-report/
+            artifacts/cart-drinks-results/
+          retention-days: 7
+          if-no-files-found: warn
