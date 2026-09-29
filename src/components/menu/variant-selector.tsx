@@ -2,22 +2,27 @@
 import { useState } from "react";
 import { formatSomoni } from "@/lib/money";
 import type { Variant } from "@/lib/menu/types";
+import { variantHeading } from "@/lib/menu/variant-kind";
 import { useCart } from "@/features/cart/cart-provider";
 import { useFeedback } from "@/features/feedback/feedback-provider";
 export function VariantSelector({
   variants,
   productId,
   productName,
+  productType = "PIZZA",
+  productAvailable = true,
 }: {
   variants: Variant[];
   productId: string;
   productName?: string;
+  productType?: "PIZZA" | "DRINK";
+  productAvailable?: boolean;
 }) {
   const [selected, setSelected] = useState<string>();
   const [adding, setAdding] = useState(false);
   const variant = variants.find((v) => v.id === selected);
   const selectable = Boolean(
-    variant?.isActive && variant.isAvailable !== false,
+    productAvailable && variant?.isActive && variant.isAvailable !== false,
   );
   const cart = useCart();
   const feedback = useFeedback();
@@ -35,10 +40,10 @@ export function VariantSelector({
   }
   return (
     <section className="variant-selector">
-      <h2>Выберите размер</h2>
+      <h2>{variantHeading(productType)}</h2>
       <div>
         {variants.map((v) => {
-          const available = v.isActive && v.isAvailable !== false;
+          const available = productAvailable && v.isActive && v.isAvailable !== false;
           return (
             <button
               className={v.id === selected ? "selected" : ""}
@@ -55,6 +60,7 @@ export function VariantSelector({
           );
         })}
       </div>
+      {variants.filter(v => v.isActive && v.isAvailable !== false).length === 0 && <p role="status">{productType === "DRINK" ? "Доступных объёмов пока нет" : "Доступных размеров пока нет"}</p>}
       <button
         type="button"
         className="disabled-cta"
@@ -66,7 +72,7 @@ export function VariantSelector({
           ? "Добавляем…"
           : selectable && variant
             ? `Добавить · ${formatSomoni(variant.priceDiram)}`
-            : "Выберите доступный размер"}
+            : productType === "DRINK" ? "Выберите доступный объём" : "Выберите доступный размер"}
       </button>
     </section>
   );
