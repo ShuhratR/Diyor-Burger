@@ -83,7 +83,7 @@ for (const viewport of viewports) {
   });
 }
 
-test("the same preview works from a category, search results, and favorites", async ({ page }) => {
+test("the same preview works from a category and search results", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   let dialog = await openPreview(page, "/menu/burgers", "Гамбургер");
   await expectViewportOverlay(page);
@@ -91,22 +91,23 @@ test("the same preview works from a category, search results, and favorites", as
   dialog = await openPreview(page, "/search?q=Гамбургер", "Гамбургер");
   await expectViewportOverlay(page);
   await page.keyboard.press("Escape");
-  // Toggle favorites through the real UI; directly setting localStorage is racy
-  // because the FavoritesProvider persists its state after hydration.
-  await page.goto("/menu");
-  const burgerCard = page.locator(".product-card").filter({
-    has: page.locator('.product-card-open[aria-label="Открыть Гамбургер"]'),
-  }).first();
-  await burgerCard.getByRole("button", { name: "Добавить в избранное" }).click();
-  await expect(burgerCard.getByRole("button", { name: "Удалить из избранного" })).toBeVisible();
-  await expect.poll(async () => page.evaluate(() =>
-    JSON.parse(localStorage.getItem("diyor-favorites") || '{"ids":[]}').ids.includes("hamburger"),
-  )).toBe(true);
+});
+
+test("favorites product preview survives a fresh browser hydration", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  // Public menu intentionally hides the favorite action: seed persisted data
+  // before navigating, so FavoritesProvider reads it during initialization.
+  await page.addInitScript(() => {
+    window.localStorage.setItem("diyor-favorites", JSON.stringify({
+      version: 1,
+      ids: ["hamburger"],
+    }));
+  });
   await page.goto("/favorites", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("button", { name: "Открыть Гамбургер", exact: true })).toBeVisible();
-  const favoriteOpener = page.getByRole("button", { name: "Открыть Гамбургер", exact: true });
-  await favoriteOpener.click();
-  dialog = page.getByRole("dialog");
+  const opener = page.locator('.product-card-open[aria-label="Открыть Гамбургер"]');
+  await expect(opener).toBeVisible();
+  await opener.click();
+  const dialog = page.getByRole("dialog");
   await expect(dialog.getByRole("heading", { name: "Гамбургер", exact: true })).toBeVisible();
   await expectViewportOverlay(page);
 });
