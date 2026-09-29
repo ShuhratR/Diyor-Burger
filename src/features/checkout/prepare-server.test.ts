@@ -51,3 +51,35 @@ describe("priced non-alcoholic beverage selections",()=>{
     expect(decodeURIComponent(result.summary.canonicalWhatsAppUrl)).toContain("Лимонад (1 л) × 2");
   });
 });
+
+
+describe("drink volumes in authoritative checkout", () => {
+  const cola = { ...fixtureProducts.find(p => p.id === "pepperoni")!, id: "drink-cola",
+    categoryId: "drinks", productType: "DRINK" as const, name: "Coca-Cola",
+    variants: [
+      { id: "cola-05", name: "0,5 л", priceDiram: 700, isActive: true, isAvailable: true, sortOrder: 0 },
+      { id: "cola-1", name: "1 л", priceDiram: 1200, isActive: true, isAvailable: true, sortOrder: 1 },
+      { id: "cola-15", name: "1,5 л", priceDiram: 1500, isActive: true, isAvailable: false, sortOrder: 2 },
+    ],
+  };
+  const catalog = [...fixtureProducts, cola];
+  it("rejects a drink without a chosen volume", () => {
+    expect(prepareCheckout({ ...base, items: [{ productId: cola.id, quantity: 1 }] },
+      catalog, zones, settings)).toMatchObject({ ok: false, code: "VARIANT_UNAVAILABLE" });
+  });
+  it("uses server price and includes selected volume in WhatsApp", () => {
+    const result = prepareCheckout({ ...base, items: [{ productId: cola.id, variantId: "cola-1", quantity: 2 }] },
+      catalog, zones, settings);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.summary.subtotalDiram).toBe(2400);
+    expect(result.summary.items[0].variant).toBe("1 л");
+    expect(decodeURIComponent(result.summary.canonicalWhatsAppUrl)).toContain("Coca-Cola (1 л) × 2");
+  });
+  it("rejects a disabled volume or forged volume on an ordinary product", () => {
+    expect(prepareCheckout({ ...base, items: [{ productId: cola.id, variantId: "cola-15", quantity: 1 }] },
+      catalog, zones, settings)).toMatchObject({ ok: false, code: "VARIANT_UNAVAILABLE" });
+    expect(prepareCheckout({ ...base, items: [{ productId: "hamburger", variantId: "cola-1", quantity: 1 }] },
+      catalog, zones, settings)).toMatchObject({ ok: false, code: "VARIANT_UNAVAILABLE" });
+  });
+});
