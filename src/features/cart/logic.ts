@@ -20,7 +20,7 @@ const lineSchema = z.object({
   productName: z.string().trim().min(1).max(120).optional(),
   variantName: z.string().trim().min(1).max(120).optional(),
 });
-const schema = z.object({ version: z.literal(1), items: z.array(lineSchema).max(MAX_CART_LINES) );
+const schema = z.object({ version: z.literal(1), items: z.array(lineSchema).max(MAX_CART_LINES) });
 
 /** Backward compatible with old version-1 carts which stored IDs and quantities only. */
 export const parseCart = (raw: string | null): CartItem[] => {
