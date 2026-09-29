@@ -54,3 +54,24 @@ describe("search across all categories and filters", () => {
       .some(product => product.productType === "COMBO")).toBe(true);
   });
 });
+
+describe("non-alcoholic beverage volume pricing",()=>{
+  const soda={...fixtureProducts.find(p=>p.id==="pepperoni")!,id:"soda-example",
+    categoryId:"drinks",productType:"DRINK" as const,name:"Лимонад",
+    variants:[
+      {id:"s",name:"0,5 л",priceDiram:700,oldPriceDiram:900,isActive:true,isAvailable:true,sortOrder:0},
+      {id:"m",name:"1 л",priceDiram:1200,isActive:true,isAvailable:true,sortOrder:1},
+      {id:"l",name:"1,5 л",priceDiram:1500,isActive:true,isAvailable:false,sortOrder:2},
+    ],
+  };
+  it("lists the first orderable volume and its own previous price",()=>{
+    expect(productDisplayPrice(soda)).toBe(700);
+    expect(productDisplayOldPrice(soda)).toBe(900);
+    expect(activeVariants(soda).map(v=>v.name)).toEqual(["0,5 л","1 л"]);
+  });
+  it("skips disabled volumes in displayed pricing",()=>{
+    const changed={...soda,variants:soda.variants.map(v=>({...v,isAvailable:v.id!=="s"}))};
+    expect(productDisplayPrice(changed)).toBe(1200);
+    expect(productDisplayOldPrice(changed)).toBeUndefined();
+  });
+});
