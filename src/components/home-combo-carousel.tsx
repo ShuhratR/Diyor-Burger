@@ -5,7 +5,7 @@ import type { Product } from "@/lib/menu/types";
 import { ProductGrid } from "@/components/menu/product-grid";
 import "./home-combo-carousel.css";
 
-const ADVANCE_EVERY_MS = 4200;
+const ADVANCE_EVERY_MS = 2500;
 const RESUME_AFTER_INTERACTION_MS = 8000;
 
 /** Preserves the administrator's order; scrolls one card at a time without cloning items. */
