@@ -12,6 +12,8 @@ import {
 import { saveReady } from "./ready";
 import type { PreparedCheckout } from "./prepare-server";
 import { formatSomoni } from "@/lib/money";
+import { CartUnavailableDialog } from "@/features/cart/cart-unavailable-dialog";
+import { combineUnavailable, type UnavailableCartItem } from "@/features/cart/availability";
 
 export function CheckoutReviewEntry({
   activeZoneIds,
@@ -25,6 +27,7 @@ export function CheckoutReviewEntry({
   const [ready, setReady] = useState(false);
   const [summary, setSummary] = useState<PreparedCheckout | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [unavailable, setUnavailable] = useState<UnavailableCartItem[]>([]);
 
   useEffect(() => {
     if (!cart.ready) return;
@@ -50,8 +53,15 @@ export function CheckoutReviewEntry({
     })
       .then((r) => r.json())
       .then((result) => {
-        if (result.ok) queueMicrotask(() => setSummary(result.summary));
-        else queueMicrotask(() => setError(result.code));
+        if (result.ok) queueMicrotask(() => {
+          setUnavailable([]);
+          setError(null);
+          setSummary(result.summary);
+        });
+        else queueMicrotask(() => {
+          setError(result.code);
+          setUnavailable(Array.isArray(result.unavailableItems) ? result.unavailableItems : []);
+        });
       })
       .catch(() => queueMicrotask(() => setError("SETTINGS_UNAVAILABLE")))
       .finally(() => queueMicrotask(() => setReady(true)));
@@ -81,6 +91,16 @@ export function CheckoutReviewEntry({
         <p className="notice">Проверяем актуальные цены и доступность блюд.</p>
       </section>
     );
+  if (error && unavailable.length > 0) {
+    const issues = combineUnavailable([], unavailable, cart.items);
+    return <section className="section">
+      <h1>Меню обновилось</h1>
+      <p className="notice">Некоторые позиции больше недоступны. Удалите их, чтобы продолжить оформление.</p>
+      <Link className="cta" href="/cart">Перейти в корзину</Link>
+      {issues.length > 0 && <CartUnavailableDialog issues={issues} items={cart.items}
+        removeItem={item => cart.removeItem(item)} onClose={() => router.push("/cart")} />}
+    </section>;
+  }
   if (error)
     return (
       <section className="section">

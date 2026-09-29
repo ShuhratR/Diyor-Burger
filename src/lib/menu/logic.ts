@@ -1,11 +1,12 @@
 import type { Category, Product, ProductFilters } from "./types";
+import { hasPricedVariants } from "./variant-kind";
 export function activeProducts(products: Product[]) { return products.filter((product) => product.isActive); }
-export function productDisplayPrice(product: Product) { const variants = product.variants?.filter((variant) => variant.isActive && variant.isAvailable !== false).sort((a,b) => a.sortOrder-b.sortOrder) ?? []; return product.productType === "PIZZA" ? variants[0]?.priceDiram : product.basePriceDiram; }
+export function productDisplayPrice(product: Product) { const variants = product.variants?.filter((variant) => variant.isActive && variant.isAvailable !== false).sort((a,b) => a.sortOrder-b.sortOrder) ?? []; return hasPricedVariants(product.productType) ? variants[0]?.priceDiram : product.basePriceDiram; }
 /** An old price on a pizza card belongs to the same size whose selling price is displayed. */
 export function productDisplayOldPrice(product: Product): number | undefined {
   const price = productDisplayPrice(product);
   if (price == null) return undefined;
-  const oldPrice = product.productType === "PIZZA"
+  const oldPrice = hasPricedVariants(product.productType)
     ? activeVariants(product)[0]?.oldPriceDiram
     : product.oldPriceDiram;
   return oldPrice != null && oldPrice > price ? oldPrice : undefined;

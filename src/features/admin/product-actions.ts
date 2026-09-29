@@ -6,8 +6,9 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { writeAdminAudit } from "@/lib/admin/audit-log";
 import { somoniToDiram, parseOptionalOldPriceDiram } from "@/lib/money";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { hasPricedVariants } from "@/lib/menu/variant-kind";
 
-const productTypes = ["NORMAL", "PIZZA", "COMBO"] as const;
+const productTypes = ["NORMAL", "PIZZA", "DRINK", "COMBO"] as const;
 const schema = z.object({ id:z.string().uuid().optional(), categoryId:z.string().uuid(), name:z.string().trim().min(1).max(120), nameTj:z.string().trim().max(120), description:z.string().trim().max(1000), descriptionTj:z.string().trim().max(1000), slug:z.string().trim().toLowerCase().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(120), productType:z.enum(productTypes), price:z.string(), oldPrice:z.string(), promotionLabel:z.string().trim().max(40), imageUrl:z.string().trim().url().max(2048).optional().or(z.literal("")), sortOrder:z.coerce.number().int().min(0).max(9999), isAvailable:z.boolean(), isActive:z.boolean(), isPopular:z.boolean() });
 
 function values(form: FormData) { return { id:String(form.get("id") ?? "") || undefined, categoryId:String(form.get("categoryId") ?? ""), name:String(form.get("name") ?? ""), nameTj:String(form.get("nameTj") ?? ""), description:String(form.get("description") ?? ""), descriptionTj:String(form.get("descriptionTj") ?? ""), slug:String(form.get("slug") || `dish-${crypto.randomUUID()}`), productType:String(form.get("productType") ?? "NORMAL"), price:String(form.get("price") ?? ""), oldPrice:String(form.get("oldPrice") ?? ""), promotionLabel:String(form.get("promotionLabel") ?? ""), imageUrl:String(form.get("imageUrl") ?? ""), sortOrder:form.get("sortOrder") ?? 0, isAvailable:form.get("isAvailable") === "on", isActive:form.get("isActive") === "on", isPopular:form.get("isPopular") === "on" }; }
@@ -16,10 +17,10 @@ function refresh() { ["/admin/products", "/menu", "/", "/combos"].forEach((path)
 
 export async function saveProduct(form: FormData) {
   const d = schema.parse(values(form)); const price = somoniToDiram(d.price);
-  if (d.productType !== "PIZZA" && (price === null || price < 0)) throw new Error("INVALID_PRICE");
+  if (!hasPricedVariants(d.productType) && (price === null || price < 0)) throw new Error("INVALID_PRICE");
   const oldPrice = parseOptionalOldPriceDiram(d.oldPrice, price);
   const c = await client();
-  const payload = { category_id:d.categoryId, name:d.name, name_tj:d.nameTj || d.name, description:d.description, description_tj:d.descriptionTj || d.description, slug:d.slug, product_type:d.productType, base_price_diram:d.productType === "PIZZA" ? null : price, old_price_diram:d.productType === "PIZZA" ? null : oldPrice, promotion_label:d.promotionLabel || null, image_url:d.imageUrl || null, sort_order:d.sortOrder, is_available:d.isAvailable, is_active:d.isActive, is_popular:d.isPopular };
+  const payload = { category_id:d.categoryId, name:d.name, name_tj:d.nameTj || d.name, description:d.description, description_tj:d.descriptionTj || d.description, slug:d.slug, product_type:d.productType, base_price_diram:hasPricedVariants(d.productType) ? null : price, old_price_diram:hasPricedVariants(d.productType) ? null : oldPrice, promotion_label:d.promotionLabel || null, image_url:d.imageUrl || null, sort_order:d.sortOrder, is_available:d.isAvailable, is_active:d.isActive, is_popular:d.isPopular };
   const result = d.id
     ? await c.from("products").update(payload).eq("id", d.id)
     : await c.from("products").insert(payload).select("id").single();
