@@ -1,0 +1,40 @@
+name: Drink schema migration safety
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "supabase/migrations/2026093001*.sql"
+      - "tests/sql/drink-migration-*.sql"
+      - ".github/workflows/cart-drink-sql.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  schema-check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: diyor_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d diyor_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exercise the two migrations in committed order on disposable Postgres
+        run: |
+          psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d diyor_ci -f tests/sql/drink-migration-setup.sql
+          psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d diyor_ci -f supabase/migrations/20260930010000_add_drink_product_type.sql
+          psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d diyor_ci -f supabase/migrations/20260930010100_drink_variant_pricing.sql
+          psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d diyor_ci -f tests/sql/drink-migration-verify.sql
