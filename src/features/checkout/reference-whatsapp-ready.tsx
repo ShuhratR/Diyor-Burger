@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/features/cart/cart-provider";
 import { clearCheckoutSession, readReady, readReadyOrder } from "./ready";
 import { saveOrderHistory } from "./order-history";
+import { clearWhatsAppHandoff, markWhatsAppHandoff } from "./whatsapp-handoff";
 
 type ReadyState =
   | { status: "loading"; url: null }
@@ -36,6 +37,12 @@ export function ReferenceWhatsAppReady() {
   }
 
   const url = ready.url;
+  const recordWhatsAppOpen = () => {
+    const order = readReadyOrder(sessionStorage);
+    if (order) saveOrderHistory(localStorage, order);
+    markWhatsAppHandoff(localStorage, cart.items);
+    setOpened(true);
+  };
   const fallbackUrl = url
     .replace("https://wa.me/", "https://api.whatsapp.com/send?phone=")
     .replace("?text=", "&text=");
@@ -46,16 +53,13 @@ export function ReferenceWhatsAppReady() {
       <h1>Заказ готов к отправке</h1>
       <p className="notice">Откройте WhatsApp и отправьте подготовленное сообщение. После отправки ресторан свяжется с вами для подтверждения.</p>
       <section className="ready-process" aria-label="Что дальше"><span><b>1</b>Заказ готов</span><span><b>2</b>WhatsApp</span><span><b>3</b>Готовим</span><span><b>4</b>Доставка</span></section>
-      <a className="cta" href={url} onClick={() => {
-        const order = readReadyOrder(sessionStorage);
-        if (order) saveOrderHistory(localStorage, order);
-        setOpened(true);
-      }}>Открыть WhatsApp</a>
-      <a className="ready-fallback" href={fallbackUrl}>Не открылось? Открыть через WhatsApp</a>
+      <a className="cta" href={url} onClick={recordWhatsAppOpen}>Открыть WhatsApp</a>
+      <a className="ready-fallback" href={fallbackUrl} onClick={recordWhatsAppOpen}>Не открылось? Открыть через WhatsApp</a>
       {opened && (
         <button className="cart-secondary" onClick={() => {
           cart.clearCart();
           clearCheckoutSession(sessionStorage);
+          clearWhatsAppHandoff(localStorage);
           router.push("/");
         }}>Я отправил заказ — очистить корзину</button>
       )}
