@@ -15,7 +15,6 @@ import {
 
 export function WhatsAppCartRecovery() {
   const cart = useCart();
-  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
 
   const refresh = useCallback(() => {
@@ -28,11 +27,7 @@ export function WhatsAppCartRecovery() {
   }, [cart.items, cart.ready]);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    refresh();
+    queueMicrotask(refresh);
     const onFocus = () => refresh();
     const onVisibility = () => {
       if (document.visibilityState === "visible") refresh();
@@ -51,7 +46,7 @@ export function WhatsAppCartRecovery() {
     };
   }, [refresh]);
 
-  if (!mounted || !open || !cart.ready) return null;
+  if (!open || !cart.ready || typeof document === "undefined") return null;
 
   return createPortal(
     <div className="cart-return-backdrop">
