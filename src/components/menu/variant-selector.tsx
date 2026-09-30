@@ -19,7 +19,7 @@ export function VariantSelector({
   productAvailable?: boolean;
 }) {
   const [selected, setSelected] = useState<string>();
-  const [adding, setAdding] = useState(false);
+  const [addState, setAddState] = useState<"idle" | "adding" | "added">("idle");
   const variant = variants.find((v) => v.id === selected);
   const selectable = Boolean(
     productAvailable && variant?.isActive && variant.isAvailable !== false,
@@ -27,16 +27,17 @@ export function VariantSelector({
   const cart = useCart();
   const feedback = useFeedback();
   function add() {
-    if (!variant || !selectable || adding) return;
-    setAdding(true);
+    if (!variant || !selectable || addState !== "idle") return;
+    setAddState("adding");
     window.setTimeout(() => {
       cart.addItem({ productId, variantId: variant.id, quantity: 1, productName: productName ?? (productType === "DRINK" ? "Напиток" : "Пицца"), variantName: variant.name });
       feedback.notify(
         "Добавлено в корзину",
-        `${productName ?? "Пицца"} · ${variant.name}`,
+        `${productName ?? (productType === "DRINK" ? "Напиток" : "Пицца")} · ${variant.name}`,
       );
-      setAdding(false);
-    }, 220);
+      setAddState("added");
+      window.setTimeout(() => setAddState("idle"), 1100);
+    }, 140);
   }
   return (
     <section className="variant-selector">
@@ -64,14 +65,16 @@ export function VariantSelector({
       <button
         type="button"
         className="disabled-cta"
-        data-state={adding ? "adding" : "idle"}
-        disabled={!selectable || adding}
+        data-state={addState}
+        disabled={!selectable || addState !== "idle"}
         onClick={add}
       >
-        {adding
+        {addState === "adding"
           ? "Добавляем…"
-          : selectable && variant
-            ? `Добавить · ${formatSomoni(variant.priceDiram)}`
+          : addState === "added" && variant
+            ? `✓ Добавлено · ${formatSomoni(variant.priceDiram)}`
+            : selectable && variant
+              ? `Добавить · ${formatSomoni(variant.priceDiram)}`
             : productType === "DRINK" ? "Выберите доступный объём" : "Выберите доступный размер"}
       </button>
     </section>

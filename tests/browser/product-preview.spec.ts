@@ -74,11 +74,24 @@ for (const viewport of viewports) {
       await expect(dialog.getByRole("heading", { name: "Выберите размер" })).toBeVisible();
       await expect(dialog.getByRole("button", { name: /28 см/ })).toBeVisible();
       await dialog.getByRole("button", { name: /28 см/ }).click();
-      await expect(dialog.getByRole("button", { name: /Добавить ·/ })).toBeEnabled();
+      const addButton = dialog.getByRole("button", { name: /Добавить ·/ });
+      await expect(addButton).toBeEnabled();
       await dialog.locator(".quick-view-content").evaluate(element => { element.scrollTop = element.scrollHeight; });
-      const purchase = await dialog.getByRole("button", { name: /Добавить ·/ }).boundingBox();
+      const purchase = await addButton.boundingBox();
       const box = await dialog.boundingBox();
       expect(purchase!.y + purchase!.height).toBeLessThanOrEqual(box!.y + box!.height + 2);
+
+      await addButton.click();
+      await expect(dialog.getByRole("button", { name: /✓ Добавлено ·/ })).toBeVisible();
+      const toast = page.getByRole("status").filter({ hasText: "Добавлено в корзину" });
+      await expect(toast).toBeVisible();
+      await expect(toast).toContainText("Пицца Пепперони");
+      await expect(toast).toContainText("28 см");
+      const layers = await page.evaluate(() => ({
+        toast: Number.parseInt(getComputedStyle(document.querySelector(".action-toast")!).zIndex, 10),
+        modal: Number.parseInt(getComputedStyle(document.querySelector(".quick-view-layer")!).zIndex, 10),
+      }));
+      expect(layers.toast).toBeGreaterThan(layers.modal);
     });
   });
 }
