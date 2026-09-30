@@ -29,6 +29,7 @@ export function LoginForm() {
             autoCapitalize="none"
             spellCheck={false}
             placeholder="Например, admin@restaurant.tj"
+            maxLength={254}
             required
             disabled={pending}
             aria-invalid={Boolean(state.error)}
@@ -53,6 +54,7 @@ export function LoginForm() {
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             placeholder="Введите пароль"
+            maxLength={512}
             required
             disabled={pending}
             aria-invalid={Boolean(state.error)}
