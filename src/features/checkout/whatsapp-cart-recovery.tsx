@@ -1,5 +1,7 @@
 "use client";
 
+import "./whatsapp-cart-recovery.css";
+
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { DiyorIcon } from "@/components/diyor-icon";
