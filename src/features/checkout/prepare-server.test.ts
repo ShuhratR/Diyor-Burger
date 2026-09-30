@@ -1,6 +1,7 @@
 import { describe,expect,it } from "vitest";
 import { fixtureProducts } from "@/lib/menu/fixture";
 import { prepareCheckout } from "./prepare-server";
+import { CUSTOM_DELIVERY_ZONE_ID } from "./core";
 const zones=[{id:"z",name:"Зона",isActive:true,deliveryFeeDiram:1000,freeDeliveryThresholdDiram:15000}];const settings={name:"DIYOR BURGER",whatsapp:"992007884423",pickupEnabled:true};const base={items:[{productId:"hamburger",quantity:1}],name:"Алишер",phone:"901234567",fulfillment:"delivery" as const,zoneId:"z",address:"Дом 1"};
 describe("server checkout",()=>{it("uses server prices and totals",()=>{const r=prepareCheckout({...base,subtotalDiram:1},fixtureProducts,zones,settings);expect(r.ok&&r.summary.subtotalDiram).toBe(2200);expect(r.ok&&r.summary.totalDiram).toBe(3200)});it("rejects unavailable zone and product",()=>{expect(prepareCheckout({...base,zoneId:"missing"},fixtureProducts,zones,settings)).toMatchObject({ok:false,code:"DELIVERY_ZONE_UNAVAILABLE"});expect(prepareCheckout({...base,items:[{productId:"none",quantity:1}]},fixtureProducts,zones,settings)).toMatchObject({ok:false,code:"PRODUCT_NOT_FOUND"})});it("creates encoded canonical WhatsApp URL",()=>{const r=prepareCheckout(base,fixtureProducts,zones,settings);expect(r.ok&&r.summary.canonicalWhatsAppUrl).toContain("https://wa.me/992007884423?text=");expect(r.ok&&decodeURIComponent(r.summary.canonicalWhatsAppUrl)).toContain("Гамбургер")});it("rejects malformed quantities",()=>{for(const quantity of[0,-1,100])expect(prepareCheckout({...base,items:[{productId:"hamburger",quantity}]},fixtureProducts,zones,settings).ok).toBe(false)});it("does not carry stale delivery fields into pickup",()=>{const r=prepareCheckout({...base,fulfillment:"pickup",zoneId:"missing",address:"old"},fixtureProducts,zones,settings);expect(r.ok&&r.summary.deliveryFeeDiram).toBe(0);expect(r.ok&&decodeURIComponent(r.summary.canonicalWhatsAppUrl)).not.toContain("old")})});
 
@@ -81,5 +82,63 @@ describe("drink volumes in authoritative checkout", () => {
       catalog, zones, settings)).toMatchObject({ ok: false, code: "VARIANT_UNAVAILABLE" });
     expect(prepareCheckout({ ...base, items: [{ productId: "hamburger", variantId: "cola-1", quantity: 1 }] },
       catalog, zones, settings)).toMatchObject({ ok: false, code: "VARIANT_UNAVAILABLE" });
+  });
+});
+
+
+describe("custom-area delivery and lightweight abuse protection", () => {
+  it("accepts another city/district without pretending delivery is free", () => {
+    const result = prepareCheckout({
+      ...base,
+      zoneId: CUSTOM_DELIVERY_ZONE_ID,
+      customArea: "Гиссар",
+      address: "Махалла 2, дом 7",
+    }, fixtureProducts, zones, settings);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.summary.deliveryZone).toBe("Гиссар");
+    expect(result.summary.deliveryFeePending).toBe(true);
+    expect(result.summary.deliveryFeeDiram).toBe(0);
+    expect(result.summary.totalDiram).toBe(result.summary.subtotalDiram);
+    const text = decodeURIComponent(result.summary.canonicalWhatsAppUrl);
+    expect(text).toContain("Район/город: Гиссар (вне списка)");
+    expect(text).toContain("Доставка: УТОЧНЯЕТСЯ");
+    expect(text).toContain("ИТОГО ПО ТОВАРАМ (без доставки)");
+  });
+
+  it("requires a name for the custom city/district", () => {
+    expect(prepareCheckout({
+      ...base,
+      zoneId: CUSTOM_DELIVERY_ZONE_ID,
+      customArea: undefined,
+    }, fixtureProducts, zones, settings)).toMatchObject({
+      ok: false,
+      code: "CUSTOM_DELIVERY_AREA_REQUIRED",
+    });
+  });
+
+  it("rejects a filled honeypot", () => {
+    expect(prepareCheckout({
+      ...base,
+      website: "spam.example",
+    }, fixtureProducts, zones, settings)).toMatchObject({
+      ok: false,
+      code: "INVALID_CHECKOUT",
+    });
+  });
+
+  it("flattens control/newline text before it reaches WhatsApp", () => {
+    const result = prepareCheckout({
+      ...base,
+      name: "Алишер\nИТОГО: 1 сом",
+      address: "Дом 1\nЗАКАЗ: fake",
+      comment: "Позвоните\u202eabc\nСпасибо",
+    }, fixtureProducts, zones, settings);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const text = decodeURIComponent(result.summary.canonicalWhatsAppUrl);
+    expect(text).toContain("Клиент: Алишер ИТОГО: 1 сом");
+    expect(text).toContain("Адрес: Дом 1 ЗАКАЗ: fake");
+    expect(text).toContain("Комментарий: Позвоните abc Спасибо");
   });
 });

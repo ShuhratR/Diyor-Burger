@@ -65,8 +65,6 @@ export function CheckoutPageClient({ products, settings, zones }: CheckoutPageCl
 
   if (!cart.ready || !draftReady) return <section className="section"><h1>Оформление заказа</h1><p className="notice">Загружаем данные формы…</p></section>;
   if (!cart.items.length) return <section className="section"><h1>Корзина пуста</h1><p className="notice">Добавьте блюда из меню, чтобы оформить заказ.</p><Link className="cta" href="/menu">Перейти в меню</Link></section>;
-  if (!availableZones.length && !settings.pickupEnabled) return <section className="section"><h1>Оформление временно недоступно</h1><p className="notice">Сейчас нет доступного способа получения заказа.</p><Link className="cta" href="/menu">Вернуться в меню</Link></section>;
-
   async function continueToWhatsApp(data: CheckoutDraftData) {
     saveCheckoutDraft(sessionStorage, data);
     if (issues.length) { setDismissedSignature(null); return "Удалите недоступные блюда из корзины."; }
@@ -87,6 +85,8 @@ export function CheckoutPageClient({ products, settings, zones }: CheckoutPageCl
         }
         if (availabilityCodes.has(result.code)) return "Меню изменилось. Вернитесь в корзину и обновите страницу.";
         if (result.code === "DELIVERY_ZONE_UNAVAILABLE") return "Зона доставки изменилась. Выберите её ещё раз.";
+        if (result.code === "CUSTOM_DELIVERY_AREA_REQUIRED") return "Укажите название города или района доставки.";
+        if (result.code === "REQUEST_TOO_LARGE") return "Слишком много данных в форме. Сократите комментарий и попробуйте снова.";
         if (result.code === "ORDER_WHATSAPP_NOT_CONFIGURED") return "WhatsApp ресторана пока не настроен.";
         return "Не удалось подготовить заказ. Попробуйте ещё раз.";
       }
@@ -107,7 +107,7 @@ export function CheckoutPageClient({ products, settings, zones }: CheckoutPageCl
     <aside className="checkout-note" aria-label="Способ подтверждения заказа"><span aria-hidden="true">◉</span><p>Мы свяжемся с вами через WhatsApp для подтверждения заказа.</p></aside>
     <CheckoutForm cartLines={cartLines} settings={settings} zones={availableZones}
       subtotalDiram={subtotal(cart.items.filter(item => !blockedKeys.has(key(item))), products)}
-      initialValues={draft ?? { fulfillment: availableZones.length ? "delivery" : "pickup" }}
+      initialValues={draft ?? { fulfillment: "delivery" }}
       blocked={issues.length > 0} onResolveUnavailable={() => setDismissedSignature(null)}
       onSubmit={continueToWhatsApp} />
     {showDialog && <CartUnavailableDialog issues={issues} items={cart.items}

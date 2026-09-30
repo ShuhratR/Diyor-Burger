@@ -6,7 +6,7 @@ type Settings = { name: string; whatsapp: string; pickupEnabled: boolean; pickup
 export type PreparedCheckout = {
   items: Array<{ productId: string; name: string; variant: string | null; quantity: number; unitPriceDiram: number; lineTotalDiram: number; imageUrl?: string }>;
   subtotalDiram: number; fulfillment: "delivery" | "pickup"; deliveryZone: string | null;
-  deliveryFeeDiram: number; freeDelivery: boolean; totalDiram: number;
+  deliveryFeeDiram: number; deliveryFeePending: boolean; freeDelivery: boolean; totalDiram: number;
   customer: { name: string; phone: string; address: string | null; comment: string | null };
   pickupAddress: string | null; canonicalWhatsAppUrl: string;
 };
@@ -32,7 +32,8 @@ export function prepareCheckout(input: unknown, products: Product[], zones: Publ
       items: value.items.map(item => ({ ...item, variant: item.variant ?? null,
         imageUrl: products.find(product => product.id === item.productId)?.imageUrl })),
       subtotalDiram: value.subtotalDiram, fulfillment: value.customer.fulfillment,
-      deliveryZone: value.zone?.name ?? null, deliveryFeeDiram: value.deliveryFeeDiram,
+      deliveryZone: value.customDelivery ? value.customer.customArea ?? null : value.zone?.name ?? null,
+      deliveryFeeDiram: value.deliveryFeeDiram, deliveryFeePending: value.customDelivery,
       freeDelivery: value.isFreeDelivery, totalDiram: value.totalDiram,
       customer: { name: value.customer.name, phone: value.customer.phone,
         address: value.customer.address ?? null, comment: value.customer.comment || null },
