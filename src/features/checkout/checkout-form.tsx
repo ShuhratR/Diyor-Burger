@@ -232,19 +232,17 @@ export function CheckoutForm({
         tabIndex={-1}
       >
         <legend>Способ получения</legend>
-        {activeZones.length > 0 && (
-          <label
-            className={values.fulfillment === "delivery" ? styles.selected : ""}
-          >
-            <input
-              type="radio"
-              name="fulfillment"
-              checked={values.fulfillment === "delivery"}
-              onChange={() => update({ fulfillment: "delivery" })}
-            />{" "}
-            Доставка
-          </label>
-        )}
+        <label
+          className={values.fulfillment === "delivery" ? styles.selected : ""}
+        >
+          <input
+            type="radio"
+            name="fulfillment"
+            checked={values.fulfillment === "delivery"}
+            onChange={() => update({ fulfillment: "delivery" })}
+          />{" "}
+          Доставка
+        </label>
         {settings.pickupEnabled && (
           <label
             className={values.fulfillment === "pickup" ? styles.selected : ""}
