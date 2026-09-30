@@ -87,6 +87,8 @@ export function CheckoutPageClient({ products, settings, zones }: CheckoutPageCl
         }
         if (availabilityCodes.has(result.code)) return "Меню изменилось. Вернитесь в корзину и обновите страницу.";
         if (result.code === "DELIVERY_ZONE_UNAVAILABLE") return "Зона доставки изменилась. Выберите её ещё раз.";
+        if (result.code === "CUSTOM_DELIVERY_AREA_REQUIRED") return "Укажите название города или района доставки.";
+        if (result.code === "REQUEST_TOO_LARGE") return "Слишком много данных в форме. Сократите комментарий и попробуйте снова.";
         if (result.code === "ORDER_WHATSAPP_NOT_CONFIGURED") return "WhatsApp ресторана пока не настроен.";
         return "Не удалось подготовить заказ. Попробуйте ещё раз.";
       }
