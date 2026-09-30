@@ -37,3 +37,33 @@
   .zones { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .zones legend { grid-column:1/-1; }
 }
+
+
+/* Custom delivery and validation feedback */
+.honeypot {
+  position:absolute !important;
+  left:-10000px !important;
+  width:1px !important;
+  height:1px !important;
+  overflow:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+.submitError {
+  margin:0;
+  padding:12px 14px;
+  border:1px solid #f1b7b2;
+  border-radius:14px;
+  background:#fff3f2;
+  color:#9f2017;
+  font-size:.9rem;
+  font-weight:700;
+}
+.field input[aria-invalid="true"],
+.field textarea[aria-invalid="true"],
+.fulfillment:focus,
+.zones:focus {
+  border-color:#d92d20;
+  box-shadow:0 0 0 2px #d92d201c;
+  outline:none;
+}
