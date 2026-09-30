@@ -142,15 +142,17 @@ export function CheckoutReviewEntry({
         <p>
           <span>Доставка</span>
           <b>
-            {summary.deliveryFeeDiram
-              ? formatSomoni(summary.deliveryFeeDiram)
-              : summary.fulfillment === "pickup"
-                ? formatSomoni(0)
-                : "Бесплатно"}
+            {summary.deliveryFeePending
+              ? "Уточняется"
+              : summary.deliveryFeeDiram
+                ? formatSomoni(summary.deliveryFeeDiram)
+                : summary.fulfillment === "pickup"
+                  ? formatSomoni(0)
+                  : "Бесплатно"}
           </b>
         </p>
         <strong>
-          <span>Итого</span>
+          <span>{summary.deliveryFeePending ? "Итого без доставки" : "Итого"}</span>
           <b>{formatSomoni(summary.totalDiram)}</b>
         </strong>
       </section>
